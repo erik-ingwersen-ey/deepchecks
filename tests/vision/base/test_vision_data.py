@@ -296,7 +296,7 @@ def test_sampler(mnist_dataset_train):
     # Act
     sampled = mnist_dataset_train.copy(n_samples=500, random_state=0)
     # Assert
-    total = sum([len(b[0]) for b in sampled])
+    total = sum(len(b[0]) for b in sampled)
     assert_that(total, equal_to(500))
     assert_that(sampled.num_samples, equal_to(500))
     assert_that(sampled.is_sampled(), equal_to(True))

@@ -58,19 +58,17 @@ def infer_task_type_by_labels(labels: pd.Series):
     # have no task type
     if len(labels) == 0:
         return None
-    # Fourth, we check if the observed labels are categorical or not
-    if is_categorical(labels, max_categorical_ratio=0.05):
-        num_classes = len(labels.dropna().unique())
-        task_type = infer_task_type_by_class_number(num_classes)
-        if infer_dtype(labels) == 'integer':
-            get_logger().warning(
-                'Due to the small number of unique labels task type was inferred as %s classification in spite of '
-                'the label column is of type integer. '
-                'Initialize your Dataset with either label_type=\"%s}\" or '
-                'label_type=\"regression\" to resolve this warning.', task_type.value, task_type.value)
-        return task_type
-    else:
+    if not is_categorical(labels, max_categorical_ratio=0.05):
         return TaskType.REGRESSION
+    num_classes = len(labels.dropna().unique())
+    task_type = infer_task_type_by_class_number(num_classes)
+    if infer_dtype(labels) == 'integer':
+        get_logger().warning(
+            'Due to the small number of unique labels task type was inferred as %s classification in spite of '
+            'the label column is of type integer. '
+            'Initialize your Dataset with either label_type=\"%s}\" or '
+            'label_type=\"regression\" to resolve this warning.', task_type.value, task_type.value)
+    return task_type
 
 
 def infer_task_type_by_class_number(num_classes):

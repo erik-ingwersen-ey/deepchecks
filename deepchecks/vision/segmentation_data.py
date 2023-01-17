@@ -143,7 +143,7 @@ class SegmentationData(VisionData):
         """
         images = self.batch_to_images(batch)
         labels = self.batch_to_labels(batch)
-        if not isinstance(labels, Sequence) or not len(labels) == len(images):
+        if not isinstance(labels, Sequence) or len(labels) != len(images):
             raise ValidationError('Deepchecks requires semantic segmentation labels to be a sequence with an entry for '
                                   'each sample')
         if len(labels) == 0:
@@ -151,7 +151,7 @@ class SegmentationData(VisionData):
         for image, label in zip(images, labels):
             if not isinstance(label, torch.Tensor):
                 raise ValidationError('Deepchecks requires semantic segmentation label to be of type torch.Tensor')
-            if not label.shape == image.shape[:2]:
+            if label.shape != image.shape[:2]:
                 raise ValidationError('Deepchecks requires semantic segmentation label to be of same width and height'
                                       ' as the corresponding image')
 

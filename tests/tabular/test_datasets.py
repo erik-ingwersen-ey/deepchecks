@@ -38,9 +38,11 @@ def assert_dataset_module(dataset_module):
     # The models were trained on python 3.8, therefore tests for equality of pretrained only on this version
     python_minor_version = sys.version_info[1]
     if python_minor_version == 8:
-        if hasattr(dataset_module, '_MODEL_VERSION'):
-            if sklearn.__version__ != dataset_module._MODEL_VERSION:
-                raise Exception(f'Can\'t test pretrained model for non matching sklearn version {sklearn.__version__}')
+        if (
+            hasattr(dataset_module, '_MODEL_VERSION')
+            and sklearn.__version__ != dataset_module._MODEL_VERSION
+        ):
+            raise Exception(f'Can\'t test pretrained model for non matching sklearn version {sklearn.__version__}')
         pretrained_model = dataset_module.load_fitted_model(pretrained=True)
         if isinstance(pretrained_model, BaseEstimator):
             assert_sklearn_model_params_equals(pretrained_model, trained_model)

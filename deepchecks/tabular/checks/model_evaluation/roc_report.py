@@ -153,15 +153,11 @@ class RocReport(SingleDatasetCheck):
             if failed_classes:
                 return ConditionResult(ConditionCategory.FAIL,
                                        f'Found classes with AUC below threshold: {failed_classes}')
-            else:
-                class_name, score = get_dict_entry_by_value(result, value_select_fn=min)
-                details = f'All classes passed, minimum AUC found is {format_number(score)} for class {class_name}'
-                return ConditionResult(ConditionCategory.PASS, details)
+            class_name, score = get_dict_entry_by_value(result, value_select_fn=min)
+            details = f'All classes passed, minimum AUC found is {format_number(score)} for class {class_name}'
+            return ConditionResult(ConditionCategory.PASS, details)
 
-        if self.excluded_classes:
-            suffix = f' except: {self.excluded_classes}'
-        else:
-            suffix = ''
+        suffix = f' except: {self.excluded_classes}' if self.excluded_classes else ''
         return self.add_condition(f'AUC score for all the classes{suffix} is greater than {min_auc}',
                                   condition)
 

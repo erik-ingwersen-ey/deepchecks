@@ -61,7 +61,7 @@ def validate_properties(properties: List[Dict[str, Any]]):
             f'instead got {type(properties).__name__}'
         )
 
-    if len(properties) == 0:
+    if not properties:
         raise DeepchecksValueError('Properties list can\'t be empty')
 
     expected_keys = ('name', 'method', 'output_type')
@@ -96,7 +96,7 @@ def validate_properties(properties: List[Dict[str, Any]]):
                 f'instead got {property_output_type}'
             )
 
-    if len(errors) > 0:
+    if errors:
         errors = '\n+ '.join(errors)
         raise DeepchecksValueError(f'List of properties contains next problems:\n+ {errors}')
 
@@ -167,11 +167,16 @@ def static_properties_from_df(df,
     pred_props = df.loc[:, prediction_cols].to_dict(orient='index')
     pi_props = df.loc[:, partial_image_cols].to_dict(orient='index')
 
-    static_props = {}
-    for k in df.index.to_list():
-        static_props[k] = {PropertiesInputType.IMAGES: image_props[k] if image_cols else None,
-                           PropertiesInputType.LABELS: label_props[k] if label_cols else None,
-                           PropertiesInputType.PREDICTIONS: pred_props[k] if prediction_cols else None,
-                           PropertiesInputType.PARTIAL_IMAGES: pi_props[k] if partial_image_cols else None}
-
-    return static_props
+    return {
+        k: {
+            PropertiesInputType.IMAGES: image_props[k] if image_cols else None,
+            PropertiesInputType.LABELS: label_props[k] if label_cols else None,
+            PropertiesInputType.PREDICTIONS: pred_props[k]
+            if prediction_cols
+            else None,
+            PropertiesInputType.PARTIAL_IMAGES: pi_props[k]
+            if partial_image_cols
+            else None,
+        }
+        for k in df.index.to_list()
+    }

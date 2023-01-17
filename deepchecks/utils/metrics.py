@@ -25,16 +25,11 @@ def get_gain(base_score, score, perfect_score, max_gain):
     scores_diff = score - base_score
     if distance_from_perfect == 0:
         # If both base score and score are perfect, return 0 gain
-        if scores_diff == 0:
-            return 0
-        # else base_score is better than score, return -max_gain
-        return -max_gain
+        return 0 if scores_diff == 0 else -max_gain
     ratio = scores_diff / distance_from_perfect
     if ratio < -max_gain:
         return -max_gain
-    if ratio > max_gain:
-        return max_gain
-    return ratio
+    return max_gain if ratio > max_gain else ratio
 
 
 def get_scorer_name(scorer) -> str:

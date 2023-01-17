@@ -87,7 +87,9 @@ class AbstractPropertyOutliers(SingleDatasetCheck):
 
         self._properties_results = defaultdict(list)
         # Take either alternative properties if defined or default properties defined by the child class
-        self.properties_list = self.properties_list if self.properties_list else self.get_default_properties(data)
+        self.properties_list = self.properties_list or self.get_default_properties(
+            data
+        )
         if any(p['output_type'] == 'class_id' for p in self.properties_list):
             warnings.warn('Properties that have class_id as output_type will be skipped.')
         self.properties_list = [p for p in self.properties_list if p['output_type'] != 'class_id']
@@ -147,9 +149,9 @@ class AbstractPropertyOutliers(SingleDatasetCheck):
                 # To get the value index inside the properties list of a single sample we take the sum of values
                 # and decrease the current outlier index. Then we get the value index from the end of the sample list.
                 index_of_value_in_sample = (values_lengths_cumsum[sample_index] - outlier_index) * -1
-                num_properties_in_sample = len(values[sample_index])
-
                 if data.has_images:
+                    num_properties_in_sample = len(values[sample_index])
+
                     image = self.draw_image(data, sample_index, index_of_value_in_sample, num_properties_in_sample)
                     image_thumbnail = prepare_thumbnail(
                         image=image,
@@ -209,10 +211,14 @@ class AbstractPropertyOutliers(SingleDatasetCheck):
                 grouped_df = pd.DataFrame(grouped, columns=['Properties'])
                 grouped_df['More Info'] = grouped_df.index
                 grouped_df = grouped_df[['More Info', 'Properties']]
-                display.append('<h5><b>Properties With No Outliers Found</h5></b>')
-                display.append(grouped_df.style.hide(axis='index') if hasattr(grouped_df.style, 'hide') else
-                               grouped_df.style.hide_index())
-
+                display.extend(
+                    (
+                        '<h5><b>Properties With No Outliers Found</h5></b>',
+                        grouped_df.style.hide(axis='index')
+                        if hasattr(grouped_df.style, 'hide')
+                        else grouped_df.style.hide_index(),
+                    )
+                )
         else:
             display = None
 

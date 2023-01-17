@@ -87,7 +87,7 @@ class WeakSegmentsPerformance(SingleDatasetCheck, WeakSegmentAbstract):
         **kwargs
     ):
         super().__init__(**kwargs)
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
         if len(self.image_properties) < 2:
             raise DeepchecksNotSupportedError('Check requires at least two image properties in order to run.')
         self.n_top_features = n_top_properties

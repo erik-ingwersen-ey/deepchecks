@@ -51,12 +51,9 @@ def draw_image(data: VisionData, sample_index: int, class_id: int) -> str:
         bboxes_of_class_id = torch.tensor([x for x in formatted_labels_of_image if x[0] == class_id])
         image = draw_bboxes(image, bboxes_of_class_id, copy_image=False, border_width=5)
 
-    image_thumbnail = prepare_thumbnail(
-        image=image,
-        size=THUMBNAIL_SIZE,
-        copy_image=False
+    return prepare_thumbnail(
+        image=image, size=THUMBNAIL_SIZE, copy_image=False
     )
-    return image_thumbnail
 
 
 class NewLabels(TrainTestCheck, ReduceLabelMixin):

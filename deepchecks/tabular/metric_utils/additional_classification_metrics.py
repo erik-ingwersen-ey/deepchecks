@@ -21,8 +21,7 @@ from deepchecks.utils.metrics import averaging_mechanism
 
 
 def assert_binary_values(y):
-    invalid = set(np.unique(y)) - {0, 1}
-    if invalid:
+    if invalid := set(np.unique(y)) - {0, 1}:
         raise DeepchecksValueError(f'Expected y to be a binary matrix with only 0 and 1 but got values: {invalid}')
 
 

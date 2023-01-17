@@ -48,18 +48,17 @@ def is_correct_version_string(value: str) -> bool:
 
 @lru_cache(maxsize=None)
 def get_version_string() -> str:
-    if not (VERSION_FILE.exists() and VERSION_FILE.is_file()):
+    if not VERSION_FILE.exists() or not VERSION_FILE.is_file():
         raise RuntimeError(
             "Version file does not exist! "
             f"(filepath: {str(VERSION_FILE)})")
-    else:
-        version = VERSION_FILE.open("r").readline()
-        if not is_correct_version_string(version):
-            raise RuntimeError(
-                "Incorrect version string! "
-                f"(filepath: {str(VERSION_FILE)})"
-            )
-        return version
+    version = VERSION_FILE.open("r").readline()
+    if not is_correct_version_string(version):
+        raise RuntimeError(
+            "Incorrect version string! "
+            f"(filepath: {str(VERSION_FILE)})"
+        )
+    return version
 
 
 @lru_cache(maxsize=None)
@@ -95,23 +94,22 @@ def read_requirements_file(path):
 @lru_cache(maxsize=None)
 def read_requirements() -> t.Dict[str,t.List[str]]:
     requirements_folder = DEEPCHECKS_DIR / "requirements"
-    
-    if not (requirements_folder.exists() and requirements_folder.is_dir()):
+
+    if not requirements_folder.exists() or not requirements_folder.is_dir():
         raise RuntimeError(
             "Cannot find folder with requirements files."
             f"(path: {str(requirements_folder)})"
         )
-    else:
-        main, main_dep_links = read_requirements_file(requirements_folder / "requirements.txt")
-        vision, vision_dep_links = read_requirements_file(requirements_folder / "vision-requirements.txt")
-        nlp, nlp_dep_links = read_requirements_file(requirements_folder / "nlp-requirements.txt")
+    main, main_dep_links = read_requirements_file(requirements_folder / "requirements.txt")
+    vision, vision_dep_links = read_requirements_file(requirements_folder / "vision-requirements.txt")
+    nlp, nlp_dep_links = read_requirements_file(requirements_folder / "nlp-requirements.txt")
 
-        return {
-            "dependency_links": main_dep_links + vision_dep_links,
-            "main": main,
-            "vision": vision,
-            # "nlp": nlp,
-        }
+    return {
+        "dependency_links": main_dep_links + vision_dep_links,
+        "main": main,
+        "vision": vision,
+        # "nlp": nlp,
+    }
 
 
 # =================================================================================

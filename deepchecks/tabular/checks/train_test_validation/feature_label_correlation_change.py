@@ -146,7 +146,7 @@ class FeatureLabelCorrelationChange(TrainTestCheck):
         def condition(value: t.Dict[Hashable, t.Dict[Hashable, float]]) -> ConditionResult:
 
             diff_dict = copy(value['train-test difference'])
-            if include_negative_diff is True:
+            if include_negative_diff:
                 diff_dict = {k: np.abs(v) for k, v in diff_dict.items()}
 
             failed_features = {
@@ -157,7 +157,7 @@ class FeatureLabelCorrelationChange(TrainTestCheck):
 
             if failed_features:
                 message = f'Found {len(failed_features)} out of {len(diff_dict)} features with PPS difference above ' \
-                          f'threshold: {failed_features}'
+                              f'threshold: {failed_features}'
                 return ConditionResult(ConditionCategory.FAIL, message)
             else:
                 return ConditionResult(ConditionCategory.PASS, get_condition_passed_message(diff_dict))

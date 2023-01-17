@@ -315,8 +315,8 @@ def _find_source_root(source_abs_path):
             return _source_root
         if len(parent) == len(dirname):
             raise RuntimeError(
-                'Couldn\'t parse root directory from '
-                'source file: {}'.format(source_abs_path))
+                f"Couldn\'t parse root directory from source file: {source_abs_path}"
+            )
         dirname = parent
 
 
@@ -336,16 +336,14 @@ def linkcode_resolve(domain, info):
 
     if mod is None:
         return None
-    if not mod.__name__.split('.')[0] in _top_modules:
+    if mod.__name__.split('.')[0] not in _top_modules:
         return None
 
     # Get the source file name and line number at which obj is defined.
     try:
         filename = inspect.getsourcefile(obj)
-    except TypeError:
+    except (TypeError, AttributeError):
         # obj is not a module, class, function, ..etc.
-        return None
-    except AttributeError:
         return None
     # inspect can return None for cython objects
     if filename is None:
@@ -469,8 +467,7 @@ def get_check_example_api_reference(filepath: str) -> t.Optional[str]:
 
     clazz_module = ".".join(check_clazz.__module__.split(".")[:-1])
 
-    apipath = f"<ul><li><a href='../../../api/generated/{clazz_module}.{notebook_name}.html'>API Reference - {notebook_name}</a></li></ul>"
-    return apipath
+    return f"<ul><li><a href='../../../api/generated/{clazz_module}.{notebook_name}.html'>API Reference - {notebook_name}</a></li></ul>"
 
 def get_report_issue_url(pagename: str) -> str:
     template = (

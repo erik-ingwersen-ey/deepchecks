@@ -151,7 +151,7 @@ def widget_to_html(
     html = template.replace('$Title', title).replace('$WidgetSnippet', snippet)
 
     # if connected is True widgets js library will load jupyterlab-plotly by itself
-    jupyterlab_plotly_lib = jupyterlab_plotly_script(False) if connected is False else ''
+    jupyterlab_plotly_lib = '' if connected else jupyterlab_plotly_script(False)
 
     requirejs_lib = requirejs_script(connected) if requirejs else ''
     widgetsjs_lib = widgets_script(connected, amd_module=requirejs)
@@ -238,14 +238,11 @@ def generate_check_docs_link(check):
     # installed, therefore we do not want to cause ImportError.
     # Refer to the setup.py for more understanding
 
-    if not (
-        module_path.startswith('deepchecks.tabular.checks')
-        or module_path.startswith('deepchecks.vision.checks')
-    ):
+    if not module_path.startswith(
+        'deepchecks.tabular.checks'
+    ) and not module_path.startswith('deepchecks.vision.checks'):
         # not builtin check, cannot generate link to the docs
         return ''
-
-    link_postfix = '.html?utm_source=display_output&utm_medium=referral&utm_campaign=check_link'
 
     # compare check full name and link to the notebook to
     # understand how link is formatted:
@@ -259,6 +256,7 @@ def generate_check_docs_link(check):
     module_parts.remove('checks')
     # Add to the check name prefix of 'plot_'
     module_parts[-1] = f'plot_{module_parts[-1]}'
+    link_postfix = '.html?utm_source=display_output&utm_medium=referral&utm_campaign=check_link'
     return get_docs_link() + 'checks_gallery/' + '/'.join([*module_parts]) + link_postfix
 
 
@@ -408,7 +406,7 @@ def split_and_keep(s: str, separators: t.Union[str, t.Iterable[str]]) -> t.List[
         separators = [separators]
 
     split_s = []
-    while len(s) != 0:
+    while s != "":
         i, substr = str_min_find(s=s, substr_list=separators)
         if i == 0:
             split_s.append(substr)
@@ -442,11 +440,11 @@ def split_by_order(s: str, separators: t.Iterable[str], keep: bool = True) -> t.
     """
     split_s = []
     separators = list(copy(separators))
-    while len(s) != 0:
-        if len(separators) > 0:
+    while s != "":
+        if separators:
             sep = separators[0]
             if s.find(sep) == 0:
-                if keep is True:
+                if keep:
                     split_s.append(sep)
                 s = s[len(sep):]
                 separators.pop(0)
@@ -463,7 +461,7 @@ def split_by_order(s: str, separators: t.Iterable[str], keep: bool = True) -> t.
 def truncate_zero_percent(ratio: float, floating_point: int):
     """Display ratio as percent without trailing zeros."""
     if floating_point == 0:  # if 0, then rstrip will strip zeros from the integer part of the percent.
-        return f'{ratio * 100:.{floating_point}f}' + '%'
+        return f'{ratio * 100:.{floating_point}f}%'
 
     return f'{ratio * 100:.{floating_point}f}'.rstrip('0').rstrip('.') + '%'
 
@@ -543,14 +541,11 @@ def format_number(x, floating_point: int = 2) -> str:
     if abs(x) < 10 ** (-floating_point):
         return f'{Decimal(x):.{floating_point}E}'
 
-    # If x is an integer, or if x when rounded is an integer (e.g. 1.999999), then return as integer:
     if round(x) == round(x, floating_point):
         return add_commas(round(x))
 
-    # If not, return as a float, but don't print unnecessary zeros at end:
-    else:
-        ret_x = round(x, floating_point)
-        return add_commas(ret_x).rstrip('0')
+    ret_x = round(x, floating_point)
+    return add_commas(ret_x).rstrip('0')
 
 
 def format_number_if_not_nan(x, floating_point: int = 2):
@@ -567,9 +562,7 @@ def format_number_if_not_nan(x, floating_point: int = 2):
     str
         String of beautified number if number is not nan
     """
-    if np.isnan(x):
-        return x
-    return format_number(x, floating_point)
+    return x if np.isnan(x) else format_number(x, floating_point)
 
 
 def format_list(l: t.List[Hashable], max_elements_to_show: int = 10, max_string_length: int = 40) -> str:
@@ -594,10 +587,7 @@ def format_list(l: t.List[Hashable], max_elements_to_show: int = 10, max_string_
     if len(output) > max_string_length:
         return output[:max_string_length] + '...'
 
-    if len(l) > max_elements_to_show:
-        return output + ', ...'
-
-    return output
+    return f'{output}, ...' if len(l) > max_elements_to_show else output
 
 
 def format_datetime(

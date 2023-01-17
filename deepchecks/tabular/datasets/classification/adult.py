@@ -130,8 +130,7 @@ _CAT_FEATURES = ['workclass', 'education', 'marital-status', 'occupation', 'rela
 _NUM_FEATURES = sorted(list(set(_FEATURES) - set(_CAT_FEATURES)))
 
 
-def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> \
-        t.Union[t.Tuple, t.Union[Dataset, pd.DataFrame]]:
+def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> t.Union[t.Tuple, t.Union[Dataset, pd.DataFrame]]:
     """Load and returns the Adult dataset (classification).
 
     Parameters
@@ -158,10 +157,10 @@ def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> \
         dataset = pd.read_csv(_FULL_DATA_URL, names=_FEATURES + [_target])
         dataset['income'] = dataset['income'].str.replace('.', '', regex=True)      # fix label inconsistency
 
-        if data_format == 'Dataset':
-            dataset = Dataset(dataset, label=_target, cat_features=_CAT_FEATURES)
+        if data_format == 'Dataframe':
             return dataset
-        elif data_format == 'Dataframe':
+        elif data_format == 'Dataset':
+            dataset = Dataset(dataset, label=_target, cat_features=_CAT_FEATURES)
             return dataset
         else:
             raise ValueError('data_format must be either "Dataset" or "Dataframe"')
@@ -170,11 +169,11 @@ def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> \
         test = pd.read_csv(_TEST_DATA_URL, skiprows=1, names=_FEATURES + [_target])
         test[_target] = test[_target].str[:-1]
 
-        if data_format == 'Dataset':
+        if data_format == 'Dataframe':
+            return train, test
+        elif data_format == 'Dataset':
             train = Dataset(train, label=_target, cat_features=_CAT_FEATURES)
             test = Dataset(test, label=_target, cat_features=_CAT_FEATURES)
-            return train, test
-        elif data_format == 'Dataframe':
             return train, test
         else:
             raise ValueError('data_format must be either "Dataset" or "Dataframe"')
@@ -213,11 +212,12 @@ def _build_model():
         ]
     )
 
-    model = Pipeline(
+    return Pipeline(
         steps=[
             ('preprocessing', preprocessor),
-            ('model', RandomForestClassifier(max_depth=5, n_jobs=-1, random_state=0))
+            (
+                'model',
+                RandomForestClassifier(max_depth=5, n_jobs=-1, random_state=0),
+            ),
         ]
     )
-
-    return model

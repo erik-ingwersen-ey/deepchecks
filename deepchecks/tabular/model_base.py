@@ -32,7 +32,7 @@ class ModelComparisonSuite(BaseSuite):
     def supported_checks(cls) -> Tuple:
         """Return tuple of supported check types of this suite."""
         from deepchecks.tabular.base_checks import ModelComparisonCheck  # pylint: disable=import-outside-toplevel
-        return tuple([ModelComparisonCheck])
+        return (ModelComparisonCheck, )
 
     def run(self,
             train_datasets: Union[Dataset, List[Dataset]],

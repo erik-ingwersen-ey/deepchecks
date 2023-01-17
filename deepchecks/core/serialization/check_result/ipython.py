@@ -253,9 +253,9 @@ class DisplayItemsHandler(html.DisplayItemsHandler):
     ):
         """Handle plotly figure item."""
         return (
-            item
-            if not plotly_to_image
-            else Image(data=item.to_image(format='jpeg', engine='auto'), format='jpeg')
+            Image(data=item.to_image(format='jpeg', engine='auto'), format='jpeg')
+            if plotly_to_image
+            else item
         )
 
     @classmethod

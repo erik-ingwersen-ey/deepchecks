@@ -89,7 +89,7 @@ def verify_bbox_format_notation(notation: str) -> Tuple[bool, List[str]]:
     # All allowed combinations are also allowed with or without score to support both label and prediction
     allowed_combinations += [{**c, 's': 1} for c in allowed_combinations]
 
-    if sum(c == received_combination for c in allowed_combinations) != 1:
+    if allowed_combinations.count(received_combination) != 1:
         raise ValueError(
             f'Incorrect bbox format notation - {notation}.\n'
             'Only next combinations of elements are allowed:\n'
@@ -108,14 +108,14 @@ def verify_bbox_format_notation(notation: str) -> Tuple[bool, List[str]]:
     normalized_tokens = []
 
     for t in tokens:
-        if t == 'l':
+        if t == 'cxcy':
+            normalized_tokens.extend(('xcenter', 'ycenter'))
+        elif t == 'l':
             normalized_tokens.append('label')
         elif t == 's':
             normalized_tokens.append('score')
         elif t == 'wh':
             normalized_tokens.extend(('width', 'height'))
-        elif t == 'cxcy':
-            normalized_tokens.extend(('xcenter', 'ycenter'))
         elif t == 'xy':
             if 'xmin' not in normalized_tokens and 'ymin' not in normalized_tokens:
                 normalized_tokens.extend(('xmin', 'ymin'))
@@ -243,7 +243,7 @@ def convert_bbox(
         are_coordinates_normalized is False
         and (image_height is not None or image_width is not None)
     ):
-        if _strict is True:
+        if _strict:
             raise ValueError(
                 'bbox format notation indicates that coordinates of the bbox '
                 'are not normalized but \'image_height\' and \'image_width\' were provided. '
@@ -251,9 +251,8 @@ def convert_bbox(
                 'normalized. Please remove those parameters or add \'n\' element to the format '
                 'notation to indicate that coordinates are indeed normalized.'
             )
-        else:
-            image_height = None
-            image_width = None
+        image_height = None
+        image_width = None
 
     return _convert_bbox(
         bbox,

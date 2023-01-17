@@ -75,7 +75,11 @@ class Context:
             if torch.cuda.is_available():
                 get_logger().warning('Checks will run on the cpu by default. To make use of cuda devices, '
                                      'use the device parameter in the run function.')
-        self._device = torch.device(device) if isinstance(device, str) else (device if device else torch.device('cpu'))
+        self._device = (
+            torch.device(device)
+            if isinstance(device, str)
+            else device or torch.device('cpu')
+        )
 
         self._prediction_formatter_error = {}
         if model is not None:
@@ -94,11 +98,11 @@ class Context:
                         msg = None
                     except DeepchecksNotImplementedError:
                         msg = f'infer_on_batch() was not implemented in {dataset_kind} ' \
-                            f'dataset, some checks will not run'
+                                f'dataset, some checks will not run'
                     except ValidationError as ex:
                         msg = f'infer_on_batch() was not implemented correctly in the {dataset_kind} dataset, the ' \
-                            f'validation has failed with the error: {ex}. To test your prediction formatting use the ' \
-                            'function `vision_data.validate_prediction(batch, model, device)`'
+                                f'validation has failed with the error: {ex}. To test your prediction formatting use the ' \
+                                'function `vision_data.validate_prediction(batch, model, device)`'
 
                     if msg:
                         self._prediction_formatter_error[dataset_kind] = msg
@@ -118,8 +122,8 @@ class Context:
                         self._static_predictions[dataset_kind] = predictions
                     except ValidationError as ex:
                         msg = f'the predictions given were not in a correct format in the {dataset_kind} dataset, ' \
-                            f'the validation has failed with the error: {ex}. To test your prediction formatting' \
-                            ' use the function `vision_data.validate_inferred_batch_predictions(predictions)`'
+                                f'the validation has failed with the error: {ex}. To test your prediction formatting' \
+                                ' use the function `vision_data.validate_inferred_batch_predictions(predictions)`'
                         self._prediction_formatter_error[dataset_kind] = msg
                         get_logger().warning(msg)
 
@@ -138,7 +142,7 @@ class Context:
                             PropertiesInputType(input_type)  # will throw value error if not allowed type
                     except ValueError as ex:
                         msg = f'the properties given were not in a correct format in the {dataset_kind} dataset, ' \
-                            f'the validation has failed with the error: {ex}.'
+                                f'the validation has failed with the error: {ex}.'
                         get_logger().warning(msg)
 
         # The copy does 2 things: Sample n_samples if parameter exists, and shuffle the data.
@@ -233,8 +237,7 @@ class Context:
 
     def assert_predictions_valid(self, kind: DatasetKind = None):
         """Assert that for given DatasetKind the model & dataset infer_on_batch return predictions in right format."""
-        error = self._prediction_formatter_error.get(kind)
-        if error:
+        if error := self._prediction_formatter_error.get(kind):
             raise DeepchecksValueError(error)
 
     def get_data_by_kind(self, kind: DatasetKind):

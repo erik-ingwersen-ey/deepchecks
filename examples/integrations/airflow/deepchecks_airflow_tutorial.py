@@ -19,7 +19,7 @@ def load_adult_dataset(**context):
     try:
         os.mkdir(data_path)
     except OSError:
-        print("Creation of the directory {} failed".format(dir_path))
+        print(f"Creation of the directory {dir_path} failed")
 
     with open(os.path.join(data_path, "adult_train.csv"), "w") as f:
         df_train.to_csv(f, index=False)
@@ -56,7 +56,7 @@ def dataset_integrity_step(**context):
     try:
         os.mkdir('suite_results')
     except OSError:
-        print("Creation of the directory {} failed".format(dir_path))
+        print(f"Creation of the directory {dir_path} failed")
 
     run_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     train_results.save_as_html(os.path.join(dir_path, f'train_integrity_{run_time}.html'))

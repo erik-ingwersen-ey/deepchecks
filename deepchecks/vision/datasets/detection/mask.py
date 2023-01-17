@@ -188,8 +188,8 @@ class MaskDataset(VisionDataset):
     def __getitem__(self, idx):
         """Get the image and labels at the given index."""
         # load images ad masks
-        file_image = 'maksssksksss' + str(idx) + '.png'
-        file_label = 'maksssksksss' + str(idx) + '.xml'
+        file_image = f'maksssksksss{str(idx)}.png'
+        file_label = f'maksssksksss{str(idx)}.xml'
         img_path = os.path.join(os.path.join(self.root, 'images'), file_image)
         label_path = os.path.join(os.path.join(self.root, 'annotations'), file_label)
         img = Image.open(img_path).convert('RGB')
@@ -243,10 +243,7 @@ class MaskDataset(VisionDataset):
             labels = torch.as_tensor(labels, dtype=torch.int64)
             # img_id to Tensor
             img_id = torch.tensor([image_id])
-            # Annotation is in dictionary format
-            target = {'boxes': boxes, 'labels': labels, 'image_id': img_id}
-
-            return target
+            return {'boxes': boxes, 'labels': labels, 'image_id': img_id}
 
     @classmethod
     def download_mask(cls, root: t.Union[str, Path]) -> Path:
@@ -279,11 +276,11 @@ class MaskDataset(VisionDataset):
     @classmethod
     def get_time_to_sample_dict(cls, root: t.Union[str, Path]) -> t.Dict[int, t.List[int]]:
         """Return a dictionary of time to sample."""
-        time_dict_url = 'https://figshare.com/ndownloader/files/38116608'
-
         root = root if isinstance(root, Path) else Path(root)
         time_to_sample_dict_path = Path(os.path.join(root, 'time_to_sample_dict.json'))
         if not time_to_sample_dict_path.exists():
+            time_dict_url = 'https://figshare.com/ndownloader/files/38116608'
+
             urllib.request.urlretrieve(time_dict_url, time_to_sample_dict_path)
 
         with open(time_to_sample_dict_path, 'r', encoding='utf8') as f:

@@ -99,8 +99,7 @@ class AntsBeesDataset(ImageFolder):
 
     def get_cv2_image(self, image):
         if isinstance(image, PIL.Image.Image):
-            image_np = np.array(image).astype('uint8')
-            return image_np
+            return np.array(image).astype('uint8')
         elif isinstance(image, np.ndarray):
             return image
         else:

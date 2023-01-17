@@ -29,7 +29,7 @@ from tests.vision.checks.train_test_validation.property_label_correlation_change
 
 
 def rand_prop(batch):
-    return [np.random.rand() for x in batch]
+    return [np.random.rand() for _ in batch]
 
 
 def mean_prop(batch):
@@ -41,12 +41,16 @@ def label_prop(batch):
 
 
 def filter_bbox_prop(batch):
-    return [[1, 2] for x in batch[0:5]]
+    return [[1, 2] for _ in batch[:5]]
 
 
 def vision_props_to_static_format(indexes, vision_props):
-    index_properties = dict(zip(indexes, [dict(zip(vision_props, t)) for t in zip(*vision_props.values())]))
-    return index_properties
+    return dict(
+        zip(
+            indexes,
+            [dict(zip(vision_props, t)) for t in zip(*vision_props.values())],
+        )
+    )
 
 
 def _create_static_properties(train: VisionData, test: VisionData, image_properties, calc_bbox=True):
@@ -87,8 +91,15 @@ def _create_static_properties(train: VisionData, test: VisionData, image_propert
                         bbox_props_list.append(calc_vision_properties(imgs, image_properties))
                     bbox_props = {k: [dic[k] for dic in bbox_props_list] for k in bbox_props_list[0]}
                     static_bbox_prop = vision_props_to_static_format(indexes, bbox_props)
-                    static_prop.update({k: {PropertiesInputType.IMAGES: static_image_prop[k],
-                                            PropertiesInputType.PARTIAL_IMAGES: static_bbox_prop[k]} for k in indexes})
+                    static_prop |= {
+                        k: {
+                            PropertiesInputType.IMAGES: static_image_prop[k],
+                            PropertiesInputType.PARTIAL_IMAGES: static_bbox_prop[
+                                k
+                            ],
+                        }
+                        for k in indexes
+                    }
                 else:
                     static_prop.update({k: {PropertiesInputType.IMAGES: static_image_prop[k]} for k in indexes})
         else:

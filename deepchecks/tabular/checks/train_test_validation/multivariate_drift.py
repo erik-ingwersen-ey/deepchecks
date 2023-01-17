@@ -103,13 +103,6 @@ class MultivariateDrift(TrainTestCheck):
 
         sample_size = min(self.n_samples, train_dataset.n_samples, test_dataset.n_samples)
 
-        headnote = """
-        <span>
-        The shown features are the features that are most important for the domain classifier - the
-        domain_classifier trained to distinguish between the train and test datasets.<br>
-        </span>
-        """
-
         values_dict, displays = run_multivariable_drift(
             train_dataframe=train_dataset.features_columns,
             test_dataframe=test_dataset.features_columns,
@@ -127,6 +120,13 @@ class MultivariateDrift(TrainTestCheck):
         )
 
         if displays:
+            headnote = """
+        <span>
+        The shown features are the features that are most important for the domain classifier - the
+        domain_classifier trained to distinguish between the train and test datasets.<br>
+        </span>
+        """
+
             displays.insert(0, headnote)
 
         return CheckResult(value=values_dict, display=displays, header='Multivariate Drift')

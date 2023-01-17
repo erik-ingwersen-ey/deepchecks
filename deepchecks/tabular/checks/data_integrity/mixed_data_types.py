@@ -84,8 +84,7 @@ class MixedDataTypes(SingleDatasetCheck):
             result_dict[column_name] = mix
             if context.with_display and mix:
                 # Format percents for display
-                formated_mix = {}
-                formated_mix['Strings'] = format_percent(mix['strings'])
+                formated_mix = {'Strings': format_percent(mix['strings'])}
                 formated_mix['Numbers'] = format_percent(mix['numbers'])
                 formated_mix['Strings examples'] = [get_ellipsis(strr, 15) for strr in mix['strings_examples']]
                 formated_mix['Numbers examples'] = '[' + format_list([format_number(float(num))

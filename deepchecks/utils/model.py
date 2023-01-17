@@ -31,7 +31,4 @@ def get_model_of_pipeline(model: Union[Pipeline, BasicModel]):
     Union[Pipeline, BasicModel]
         the inner BaseEstimator of the Pipeline or itself
     """
-    if isinstance(model, Pipeline):
-        # get model type from last step in pipeline
-        return model.steps[-1][1]
-    return model
+    return model.steps[-1][1] if isinstance(model, Pipeline) else model

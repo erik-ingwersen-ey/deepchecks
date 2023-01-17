@@ -105,7 +105,7 @@ class TpFpFn(Metric, MetricMixin):
         bb_info = self.group_class_detection_label(detected, ground_truth)
         ious = {k: self.calc_pairwise_ious(v["detected"], v["ground_truth"]) for k, v in bb_info.items()}
 
-        for class_id in ious.keys():
+        for class_id in ious:
             tp, fp, fn = self._evaluate_image(
                 np.array(self.get_confidences(bb_info[class_id]["detected"])),
                 bb_info[class_id]["ground_truth"],

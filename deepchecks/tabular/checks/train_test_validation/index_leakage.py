@@ -62,8 +62,7 @@ class IndexTrainTestLeakage(TrainTestCheck):
         train_index = train_dataset.index_col
         val_index = test_dataset.index_col
 
-        index_intersection = list(set(train_index).intersection(val_index))
-        if len(index_intersection) > 0:
+        if index_intersection := list(set(train_index).intersection(val_index)):
             size_in_test = len(index_intersection) / test_dataset.n_samples
             if context.with_display:
                 text = f'{size_in_test:.1%} of test data indexes appear in training data'

@@ -41,7 +41,7 @@ class MeanDice(Metric):
         self._evals = defaultdict(lambda: {'dice': 0, 'count': 0})
         self.threshold = threshold
         self.smooth = smooth
-        if average in ['none', 'micro', 'macro']:
+        if average in {'none', 'micro', 'macro'}:
             self.average = average
         else:
             raise DeepchecksValueError('average should be one of: none, micro, macro')
@@ -106,7 +106,7 @@ class MeanIoU(Metric):
         self._evals = defaultdict(lambda: {'iou': 0, 'count': 0})
         self.threshold = threshold
         self.smooth = smooth
-        if average in ['none', 'micro', 'macro']:
+        if average in {'none', 'micro', 'macro'}:
             self.average = average
         else:
             raise DeepchecksValueError('average should be one of: none, micro, macro')

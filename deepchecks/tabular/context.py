@@ -72,14 +72,16 @@ class _DummyModel:
                  validate_data_on_predict: bool = True,
                  model_classes: t.Optional[t.List] = None):
 
-        if train is not None and test is not None:
-            # check if datasets have same indexes
-            if set(train.data.index) & set(test.data.index):
-                train.data.index = map(lambda x: f'train-{x}', list(train.data.index))
-                test.data.index = map(lambda x: f'test-{x}', list(test.data.index))
-                get_logger().warning('train and test datasets have common index - adding "train"/"test"'
-                                     ' prefixes. To avoid that provide datasets with no common indexes '
-                                     'or pass the model object instead of the predictions.')
+        if (
+            train is not None
+            and test is not None
+            and set(train.data.index) & set(test.data.index)
+        ):
+            train.data.index = map(lambda x: f'train-{x}', list(train.data.index))
+            test.data.index = map(lambda x: f'test-{x}', list(test.data.index))
+            get_logger().warning('train and test datasets have common index - adding "train"/"test"'
+                                 ' prefixes. To avoid that provide datasets with no common indexes '
+                                 'or pass the model object instead of the predictions.')
 
         feature_df_list = []
         predictions = []
@@ -352,9 +354,7 @@ class Context:
         """Return feature importance type if feature importance is available, else None."""
         # Calling first feature_importance, because _importance_type is assigned only after feature importance is
         # calculated.
-        if self.feature_importance:
-            return self._importance_type
-        return None
+        return self._importance_type if self.feature_importance else None
 
     def have_test(self):
         """Return whether there is test dataset defined."""

@@ -167,9 +167,10 @@ class StringMismatchComparison(TrainTestCheck):
 def _condition_percent_limit(result, ratio: float):
     not_passing_columns = {}
     for col, baseforms in result.items():
-        sum_percent = 0
-        for info in baseforms.values():
-            sum_percent += info['percent_variants_only_in_test']
+        sum_percent = sum(
+            info['percent_variants_only_in_test']
+            for info in baseforms.values()
+        )
         if sum_percent > ratio:
             not_passing_columns[col] = format_percent(sum_percent)
 
@@ -181,6 +182,6 @@ def _condition_percent_limit(result, ratio: float):
 
 
 def _percentage_in_series(series, counts, values):
-    count = sum([counts[value] for value in values])
+    count = sum(counts[value] for value in values)
     percent = count / series.size
     return percent, f'{format_percent(percent)} ({count})'

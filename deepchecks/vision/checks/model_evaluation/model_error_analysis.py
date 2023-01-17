@@ -93,7 +93,7 @@ class ModelErrorAnalysis(TrainTestCheck):
         self._train_scores = None
         self._test_scores = None
 
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
 
     def initialize_run(self, context: Context):
         """Initialize property and score lists."""

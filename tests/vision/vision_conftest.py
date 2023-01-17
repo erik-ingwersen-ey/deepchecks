@@ -87,7 +87,7 @@ def _hash_image(image):
     avg_pixel = sum(pixel_data) / len(pixel_data)
 
     bits = ''.join(['1' if (px >= avg_pixel) else '0' for px in pixel_data])
-    hex_representation = str(hex(int(bits, 2)))[2:][::-1].upper()
+    hex_representation = hex(int(bits, 2))[2:][::-1].upper()
     md_5hash = md5()
     md_5hash.update(hex_representation.encode())
     return md_5hash.hexdigest()
@@ -95,12 +95,11 @@ def _hash_image(image):
 
 @pytest.fixture(scope='session')
 def device():
-    if torch.cuda.is_available():
-        device = torch.device('cuda:0')  # pylint: disable=redefined-outer-name
-    else:
-        device = torch.device('cpu')  # pylint: disable=redefined-outer-name
-
-    return device
+    return (
+        torch.device('cuda:0')
+        if torch.cuda.is_available()
+        else torch.device('cpu')
+    )
 
 
 @pytest.fixture(scope='session')
@@ -247,13 +246,11 @@ def mock_trained_yolov5_object_detection(device):  # pylint: disable=redefined-o
 
 @pytest.fixture(scope='session')
 def obj_detection_images():
-    uris = [
+    return [
         'http://images.cocodataset.org/val2017/000000397133.jpg',
         'http://images.cocodataset.org/val2017/000000037777.jpg',
-        'http://images.cocodataset.org/val2017/000000252219.jpg'
+        'http://images.cocodataset.org/val2017/000000252219.jpg',
     ]
-
-    return uris
 
 
 @pytest.fixture(scope='session')

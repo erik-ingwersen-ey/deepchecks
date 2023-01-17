@@ -14,7 +14,7 @@ for vision_data in [train_ds, test_ds]:
         for i, batch in enumerate(vision_data):
             predictions = vision_data.infer_on_batch(batch, model, device)
             indexes = list(vision_data.data_loader.batch_sampler)[i]
-            static_pred.update(dict(zip(indexes, predictions)))
+            static_pred |= dict(zip(indexes, predictions))
     else:
         static_pred = None
     static_preds.append(static_pred)

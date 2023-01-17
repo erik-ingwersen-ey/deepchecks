@@ -118,8 +118,9 @@ class SuiteResultSerializer(JunitSerializer['suite.SuiteResult']):
             return root
 
         else:
-            xml_str = _clean_illegal_xml_chars(ET.tostring(root, encoding=encoding).decode(encoding))
-            return xml_str
+            return _clean_illegal_xml_chars(
+                ET.tostring(root, encoding=encoding).decode(encoding)
+            )
 
     @staticmethod
     def _process_test_suites(failure_tag: str, results: Dict, root: ET.Element) -> ET.Element:
@@ -150,17 +151,28 @@ class SuiteResultSerializer(JunitSerializer['suite.SuiteResult']):
             }
 
             if failure_tag == f'{FAILURE}':
-                attributes.update({'failures': str(
-                    sum(list(results[this_suite][i])[0].tag == FAILURE for i in range(len(results[this_suite]))))})
+                attributes['failures'] = str(
+                    sum(
+                        list(results[this_suite][i])[0].tag == FAILURE
+                        for i in range(len(results[this_suite]))
+                    )
+                )
             elif failure_tag == f'{SKIPPED}':
-                attributes.update({'skipped': str(
-                    sum(list(results[this_suite][i])[0].tag == SKIPPED for i in range(len(results[this_suite]))))})
-                attributes.update({'failures': '0'})
+                attributes['skipped'] = str(
+                    sum(
+                        list(results[this_suite][i])[0].tag == SKIPPED
+                        for i in range(len(results[this_suite]))
+                    )
+                )
+                attributes['failures'] = '0'
 
-            suite_time = sum([int(this_result.attrib['time']) for this_result in results[this_suite]])
+            suite_time = sum(
+                int(this_result.attrib['time'])
+                for this_result in results[this_suite]
+            )
             run_time += suite_time
 
-            attributes.update({'time': str(suite_time)})
+            attributes['time'] = str(suite_time)
 
             test_suite = ET.SubElement(root, 'testsuite', attrib=attributes)
             test_suite.extend(results[this_suite])
@@ -184,7 +196,7 @@ class SuiteResultSerializer(JunitSerializer['suite.SuiteResult']):
         -------
         ET.Element
         """
-        count = sum([len(value) for key, value in results.items()])
+        count = sum(len(value) for key, value in results.items())
 
         attributes = {
             'name': self.value.name
@@ -193,14 +205,12 @@ class SuiteResultSerializer(JunitSerializer['suite.SuiteResult']):
         }
 
         if failure_tag == f'{FAILURE}':
-            attributes.update({'failures': str(len(self.value.failures))})
+            attributes['failures'] = str(len(self.value.failures))
         elif failure_tag == f'{SKIPPED}':
-            attributes.update({'skipped': str(len(self.value.failures))})
-            attributes.update({'failures': '0'})
+            attributes['skipped'] = str(len(self.value.failures))
+            attributes['failures'] = '0'
 
-        root = ET.Element('testsuites', attrib=attributes)
-
-        return root
+        return ET.Element('testsuites', attrib=attributes)
 
     def _serialize_test_cases(self, encoding, failure_tag) -> Dict[str, List[ET.Element]]:
         """Iterate over the test cases and serialize them into test suites.

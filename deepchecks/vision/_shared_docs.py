@@ -9,11 +9,12 @@
 # ----------------------------------------------------------------------------
 #
 """Module with common docstrings."""
+
 from deepchecks.utils.decorators import Substitution
 
-_shared_docs = {}
-
-_shared_docs['additional_context_params'] = """
+_shared_docs = {
+    'additional_context_params': (
+        """
 model_name : str , default: ''
     The name of the model
 scorers : Optional[Mapping[str, Metric]] , default: None
@@ -32,14 +33,21 @@ train_predictions : Optional[Dict[int, Union[Sequence[torch.Tensor], torch.Tenso
     Dictionary of the model prediction over the train dataset (keys are the indexes).
 test_predictions : Optional[Dict[int, Union[Sequence[torch.Tensor], torch.Tensor]]] , default None
     Dictionary of the model prediction over the test dataset (keys are the indexes).
-""".strip('\n')
-
-_shared_docs['property_aggregation_method_argument'] = """
+""".strip(
+            '\n'
+        )
+    ),
+    'property_aggregation_method_argument': (
+        """
 argument for the reduce_output functionality, decides how to aggregate the individual properties drift scores
 for a collective score between 0 and 1. Possible values are:
 'mean': Mean of all properties scores.
 'none': No averaging. Return a dict with a drift score for each property.
 'max': Maximum of all the properties drift scores.
-""".strip('\n')
+""".strip(
+            '\n'
+        )
+    ),
+}
 
 docstrings = Substitution(**_shared_docs)

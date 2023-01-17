@@ -111,11 +111,7 @@ class SuiteResult(DisplayableResult):
         'check_types.CheckFailure'
     ]]:
         """Select results by indexes."""
-        output = []
-        for index, result in enumerate(self.results):
-            if index in idx:
-                output.append(result)
-        return output
+        return [result for index, result in enumerate(self.results) if index in idx]
 
     def __repr__(self):
         """Return default __repr__ function uses value."""
@@ -314,9 +310,7 @@ class SuiteResult(DisplayableResult):
             # save full html report
             path = pathlib.Path(file)
             html_file = str(
-                pathlib.Path(file).parent
-                .resolve()
-                .joinpath(path.stem+'.html')
+                pathlib.Path(file).parent.resolve().joinpath(f'{path.stem}.html')
             )
             self.save_as_html(html_file)
             # build string containing html report as an attachment
@@ -330,8 +324,10 @@ class SuiteResult(DisplayableResult):
                     f'\n> 📎 ![Full {self.name} Report]({html_file})\n'
                 )
             else:
-                error_message = 'Only \'github\' and \'gitlab\' are supported right now.'
-                error_message += '\nThough one of these formats '
+                error_message = (
+                    'Only \'github\' and \'gitlab\' are supported right now.'
+                    + '\nThough one of these formats '
+                )
                 error_message += 'might work for your target Git platform!'
                 raise ValueError(error_message)
             with open(file, 'w', encoding='utf-8') as file_handle:
@@ -499,9 +495,10 @@ class SuiteResult(DisplayableResult):
         """
         json_dict = jsonpickle.loads(json_res)
         name = json_dict['name']
-        results = []
-        for res in json_dict['results']:
-            results.append(check_types.BaseCheckResult.from_json(res))
+        results = [
+            check_types.BaseCheckResult.from_json(res)
+            for res in json_dict['results']
+        ]
         return SuiteResult(name, results)
 
 
@@ -536,7 +533,12 @@ class BaseSuite:
     def __repr__(self, tabs=0):
         """Representation of suite as string."""
         tabs_str = '\t' * tabs
-        checks_str = ''.join([f'\n{c.__repr__(tabs + 1, str(n) + ": ")}' for n, c in self.checks.items()])
+        checks_str = ''.join(
+            [
+                f'\n{c.__repr__(tabs + 1, f"{str(n)}: ")}'
+                for n, c in self.checks.items()
+            ]
+        )
         return f'{tabs_str}{self.name}: [{checks_str}\n{tabs_str}]'
 
     def __getitem__(self, index):

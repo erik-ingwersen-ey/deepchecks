@@ -112,7 +112,7 @@ def train_test_validation(n_top_show: int = 5,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
 
     return Suite(
         'Train Test Validation Suite',
@@ -213,7 +213,7 @@ def model_evaluation(alternative_metrics: Dict[str, Metric] = None,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
 
     return Suite(
         'Model Evaluation Suite',
@@ -296,7 +296,7 @@ def data_integrity(image_properties: List[Dict[str, Any]] = None,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
 
     return Suite(
         'Data Integrity Suite',

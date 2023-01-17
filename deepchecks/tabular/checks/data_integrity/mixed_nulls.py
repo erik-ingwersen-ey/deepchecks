@@ -155,19 +155,17 @@ class MixedNulls(SingleDatasetCheck):
             Returns list of null values as set object
         """
         result: set
-        if nsl:
-            if not isinstance(nsl, Iterable):
-                raise DeepchecksValueError('null_string_list must be an iterable')
-            if len(nsl) == 0:
-                raise DeepchecksValueError("null_string_list can't be empty list")
-            if any((not isinstance(string, str) for string in nsl)):
-                raise DeepchecksValueError("null_string_list must contain only items of type 'str'")
-            result = set(nsl)
-        else:
+        if not nsl:
             # Default values
-            result = set(DEFAULT_NULL_VALUES)
+            return set(DEFAULT_NULL_VALUES)
 
-        return result
+        if not isinstance(nsl, Iterable):
+            raise DeepchecksValueError('null_string_list must be an iterable')
+        if len(nsl) == 0:
+            raise DeepchecksValueError("null_string_list can't be empty list")
+        if any((not isinstance(string, str) for string in nsl)):
+            raise DeepchecksValueError("null_string_list must contain only items of type 'str'")
+        return set(nsl)
 
     def add_condition_different_nulls_less_equal_to(self, max_allowed_null_types: int = 1):
         """Add condition - require column's number of different null values to be less or equal to threshold.

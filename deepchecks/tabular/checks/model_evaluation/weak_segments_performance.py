@@ -93,7 +93,7 @@ class WeakSegmentsPerformance(SingleDatasetCheck, WeakSegmentAbstract):
         self.n_to_show = n_to_show
         self.random_state = random_state
         self.loss_per_sample = loss_per_sample
-        self.alternative_scorer = alternative_scorer if alternative_scorer else None
+        self.alternative_scorer = alternative_scorer or None
         self.categorical_aggregation_threshold = categorical_aggregation_threshold
 
     def run_logic(self, context: Context, dataset_kind) -> CheckResult:

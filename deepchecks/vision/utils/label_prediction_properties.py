@@ -34,8 +34,7 @@ def _get_bbox_area(labels: List[torch.Tensor]) -> List[List[int]]:
 
 def _count_num_bboxes(labels: List[torch.Tensor]) -> List[int]:
     """Return a list containing the number of bboxes in per sample batch."""
-    num_bboxes = [label.shape[0] for label in labels]
-    return num_bboxes
+    return [label.shape[0] for label in labels]
 
 
 def _get_samples_per_class_semantic_segmentation(labels: List[torch.Tensor]) -> List[List[int]]:

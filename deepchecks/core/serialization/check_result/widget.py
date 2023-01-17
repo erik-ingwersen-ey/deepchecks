@@ -119,13 +119,14 @@ class CheckResultSerializer(WidgetSerializer['check_types.CheckResult']):
         -------
         ipywidgets.HTML
         """
-        widget = HTML(value=self._html_serializer.prepare_conditions_table(
-            max_info_len=max_info_len,
-            include_icon=include_icon,
-            include_check_name=include_check_name,
-            output_id=output_id
-        ))
-        return widget
+        return HTML(
+            value=self._html_serializer.prepare_conditions_table(
+                max_info_len=max_info_len,
+                include_icon=include_icon,
+                include_check_name=include_check_name,
+                output_id=output_id,
+            )
+        )
 
     def prepare_additional_output(
         self,
@@ -219,11 +220,11 @@ class DisplayItemsHandler(html.DisplayItemsHandler):
         **kwargs
     ) -> Widget:
         return (
-            go.FigureWidget(data=item)
-            if not plotly_to_image
-            else HTML(value=super().handle_figure(
-                item, index, plotly_to_image, **kwargs
-            ))
+            HTML(
+                value=super().handle_figure(item, index, plotly_to_image, **kwargs)
+            )
+            if plotly_to_image
+            else go.FigureWidget(data=item)
         )
 
     @classmethod

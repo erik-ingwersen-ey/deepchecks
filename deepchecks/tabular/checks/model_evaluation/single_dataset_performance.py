@@ -147,7 +147,7 @@ class SingleDatasetPerformance(SingleDatasetCheck, ReduceMetricClassMixin):
                     metrics_pass.append(min(metric_result['Value']) > threshold)
                 elif class_mode == 'any':
                     metrics_pass.append(max(metric_result['Value']) > threshold)
-                elif str(class_mode) in [str(x) for x in metric_result['Class'].unique()]:
+                elif class_mode in [str(x) for x in metric_result['Class'].unique()]:
                     metrics_pass.append(metric_result['Value'][class_mode] > threshold)
                 else:
                     raise DeepchecksValueError(f'class_mode expected be one of the classes in the check results or any '
@@ -155,8 +155,7 @@ class SingleDatasetPerformance(SingleDatasetCheck, ReduceMetricClassMixin):
 
             if all(metrics_pass):
                 return ConditionResult(ConditionCategory.PASS, 'Passed for all of the metrics.')
-            else:
-                failed_metrics = ([a for a, b in zip(metrics_to_check, metrics_pass) if not b])
-                return ConditionResult(ConditionCategory.FAIL, f'Failed for metrics: {failed_metrics}')
+            failed_metrics = ([a for a, b in zip(metrics_to_check, metrics_pass) if not b])
+            return ConditionResult(ConditionCategory.FAIL, f'Failed for metrics: {failed_metrics}')
 
         return self.add_condition(f'Selected metrics scores are greater than {format_number(threshold)}', condition)

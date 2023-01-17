@@ -99,8 +99,12 @@ def _rgb_relative_intensity_mean(batch: List[np.ndarray]) -> List[Tuple[float, f
         List of 3-dimensional arrays, each dimension is the normalized mean of the color channel. An array is
         returned for each image.
     """
-    return [_normalize_pixelwise(img).mean(axis=(1, 2)) if not _is_grayscale(img) else (None, None, None)
-            for img in batch]
+    return [
+        (None, None, None)
+        if _is_grayscale(img)
+        else _normalize_pixelwise(img).mean(axis=(1, 2))
+        for img in batch
+    ]
 
 
 def _rgb_relative_intensity_mean_array(batch: List[np.ndarray]) -> np.ndarray:
@@ -144,17 +148,16 @@ def sample_pixels(image: np.ndarray, n_pixels: int):
     """Sample the image to improve runtime, expected image format H,W,C."""
     flat_image = image.reshape((-1, image.shape[-1]))
     pixel_idxs = np.random.choice(flat_image.shape[0], n_pixels)
-    sampled_image = flat_image[pixel_idxs, np.newaxis, :]
-    return sampled_image
+    return flat_image[pixel_idxs, np.newaxis, :]
 
 
 def calc_default_image_properties(batch: List[np.ndarray], sample_n_pixels: int = 10000) -> Dict[str, list]:
     """Speed up the calculation for the default image properties by sharing common actions."""
-    results_dict = {}
     sizes_array = _sizes_array(batch)
-    results_dict['Aspect Ratio'] = list(sizes_array[:, 0] / sizes_array[:, 1])
-    results_dict['Area'] = list(sizes_array[:, 0] * sizes_array[:, 1])
-
+    results_dict = {
+        'Aspect Ratio': list(sizes_array[:, 0] / sizes_array[:, 1]),
+        'Area': list(sizes_array[:, 0] * sizes_array[:, 1]),
+    }
     sampled_images = [sample_pixels(img, sample_n_pixels) for img in batch]
 
     grayscale_images = [img if _is_grayscale(img) else rgb2gray(img) for img in sampled_images]

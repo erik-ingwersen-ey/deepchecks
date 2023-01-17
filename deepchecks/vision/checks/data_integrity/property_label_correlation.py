@@ -88,7 +88,7 @@ class PropertyLabelCorrelation(SingleDatasetCheck):
     ):
         super().__init__(**kwargs)
 
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
 
         self.min_pps_to_show = min_pps_to_show
         self.n_top_properties = n_top_properties

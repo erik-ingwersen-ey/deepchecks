@@ -30,7 +30,7 @@ def requirejs_script(connected: bool = True):
     -------
     str
     """
-    if connected is True:
+    if connected:
         return textwrap.dedent("""
             <script
                 src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
@@ -39,13 +39,12 @@ def requirejs_script(connected: bool = True):
                 referrerpolicy="no-referrer">
             </script>
         """)
-    else:
-        path = os.path.join('core', 'resources', 'requirejs.min.js')
-        js = pkgutil.get_data('deepchecks', path)
-        if js is None:
-            raise RuntimeError('Did not find requirejs asset.')
-        js = js.decode('utf-8')
-        return f'<script type="text/javascript">{js}</script>'
+    path = os.path.join('core', 'resources', 'requirejs.min.js')
+    js = pkgutil.get_data('deepchecks', path)
+    if js is None:
+        raise RuntimeError('Did not find requirejs asset.')
+    js = js.decode('utf-8')
+    return f'<script type="text/javascript">{js}</script>'
 
 
 def widgets_script(connected: bool = True, amd_module: bool = False) -> str:
@@ -62,15 +61,15 @@ def widgets_script(connected: bool = True, amd_module: bool = False) -> str:
     -------
     str
     """
-    if connected is True:
+    if connected:
         url = (
             f'https://unpkg.com/@jupyter-widgets/html-manager@{__html_manager_version__}/dist/embed-amd.js'
-            if amd_module is True
+            if amd_module
             else f'https://unpkg.com/@jupyter-widgets/html-manager@{__html_manager_version__}/dist/embed.js'
         )
         return f'<script src="{url}" crossorigin="anonymous"></script>'
     else:
-        asset_name = 'widgets-embed-amd.js' if amd_module is True else 'widgets-embed.js'
+        asset_name = 'widgets-embed-amd.js' if amd_module else 'widgets-embed.js'
         path = os.path.join('core', 'resources', asset_name)
         js = pkgutil.get_data('deepchecks', path)
 
@@ -93,7 +92,7 @@ def jupyterlab_plotly_script(connected: bool = True) -> str:
     -------
     str
     """
-    if connected is True:
+    if connected:
         url = 'https://unpkg.com/jupyterlab-plotly@^5.5.0/dist/index.js'
         return f'<script type="text/javascript" src="{url}" async></script>'
     else:
@@ -109,7 +108,7 @@ def jupyterlab_plotly_script(connected: bool = True) -> str:
 
 def suite_template(full_html: bool = True) -> str:
     """Get suite template."""
-    asset_name = 'suite-template-full.html' if full_html else 'suite-template-full.html'
+    asset_name = 'suite-template-full.html'
     path = os.path.join('core', 'resources', asset_name)
     template = pkgutil.get_data('deepchecks', path)
 

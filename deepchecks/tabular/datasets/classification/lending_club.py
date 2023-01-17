@@ -88,11 +88,11 @@ def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> t.Uni
     if not as_train_test:
         dataset = pd.read_csv(_FULL_DATA_URL, index_col=False)
 
-        if data_format == 'Dataset':
+        if data_format == 'Dataframe':
+            return dataset
+        elif data_format == 'Dataset':
             dataset = Dataset(dataset, label=_target, cat_features=_CAT_FEATURES, index_name=_index_name,
                               datetime_name=_datetime_name)
-            return dataset
-        elif data_format == 'Dataframe':
             return dataset
         else:
             raise ValueError('data_format must be either "Dataset" or "Dataframe"')
@@ -100,13 +100,13 @@ def load_data(data_format: str = 'Dataset', as_train_test: bool = True) -> t.Uni
         train = pd.read_csv(_TRAIN_DATA_URL, index_col=False)
         test = pd.read_csv(_TEST_DATA_URL, index_col=False)
 
-        if data_format == 'Dataset':
+        if data_format == 'Dataframe':
+            return train, test
+        elif data_format == 'Dataset':
             train = Dataset(train, label=_target, cat_features=_CAT_FEATURES, index_name=_index_name,
                             datetime_name=_datetime_name)
             test = Dataset(test, label=_target, cat_features=_CAT_FEATURES, index_name=_index_name,
                            datetime_name=_datetime_name)
-            return train, test
-        elif data_format == 'Dataframe':
             return train, test
         else:
             raise ValueError('data_format must be either "Dataset" or "Dataframe"')
@@ -139,11 +139,19 @@ def _build_model():
     preprocessor = ColumnTransformer(
         transformers=[('num', 'passthrough', _NUM_FEATURES), ('cat', categorical_transformer, _CAT_FEATURES), ])
 
-    model = Pipeline(steps=[('preprocessing', preprocessor), ('model',
-                                                              run_available_kwargs(HistGradientBoostingClassifier,
-                                                                                   max_depth=5, max_iter=200,
-                                                                                   random_state=42,
-                                                                                   categorical_features=[False] * len(
-                                                                                       _NUM_FEATURES) + [True] * len(
-                                                                                       _CAT_FEATURES)))])
-    return model
+    return Pipeline(
+        steps=[
+            ('preprocessing', preprocessor),
+            (
+                'model',
+                run_available_kwargs(
+                    HistGradientBoostingClassifier,
+                    max_depth=5,
+                    max_iter=200,
+                    random_state=42,
+                    categorical_features=[False] * len(_NUM_FEATURES)
+                    + [True] * len(_CAT_FEATURES),
+                ),
+            ),
+        ]
+    )

@@ -205,7 +205,7 @@ class WeakSegmentAbstract:
     def _format_partition_vec_for_display(self, partition_vec: np.array, feature_name: str,
                                           seperator: Union[str, None] = '<br>') -> List[Union[List, str]]:
         """Format partition vector for display. If seperator is None returns a list instead of a string."""
-        if feature_name == '':
+        if not feature_name:
             return ['']
 
         result = []
@@ -223,8 +223,10 @@ class WeakSegmentAbstract:
                     result.append(seperator.join([str(x) for x in feature_map_df.iloc[values_in_range, 1]]))
 
         else:
-            for lower, upper in zip(partition_vec[:-1], partition_vec[1:]):
-                result.append(f'({format_number(lower)}, {format_number(upper)}]')
+            result.extend(
+                f'({format_number(lower)}, {format_number(upper)}]'
+                for lower, upper in zip(partition_vec[:-1], partition_vec[1:])
+            )
             result[0] = '[' + result[0][1:]
 
         return result

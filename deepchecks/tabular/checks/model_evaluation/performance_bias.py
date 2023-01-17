@@ -183,14 +183,16 @@ class PerformanceBias(SingleDatasetCheck):
 
     def _make_partitions(self, dataset):
         """Define partitions of a given dataset based on `protected_feature` and `control_feature`."""
-        partitions = {}
-
-        if dataset.is_categorical(self.protected_feature):
-            partitions[self.protected_feature] = partition_column(dataset, self.protected_feature, max_segments=np.Inf)
-        else:
-            partitions[self.protected_feature] = partition_column(
+        partitions = {
+            self.protected_feature: partition_column(
+                dataset, self.protected_feature, max_segments=np.Inf
+            )
+            if dataset.is_categorical(self.protected_feature)
+            else partition_column(
                 dataset, self.protected_feature, max_segments=self.max_bins
             )
+        }
+
         if self.control_feature is not None:
             partitions[self.control_feature] = partition_column(
                 dataset, self.control_feature, max_segments=self.max_bins
@@ -214,10 +216,7 @@ class PerformanceBias(SingleDatasetCheck):
 
         def score(data, model, scorer):
             if len(data) < self.min_subgroup_size:
-                if classwise:
-                    return {cls: np.nan for cls in model_classes}
-                else:
-                    return np.nan
+                return {cls: np.nan for cls in model_classes} if classwise else np.nan
             return scorer(model, dataset.copy(data))
 
         def apply_scorer(x):
@@ -364,7 +363,7 @@ class PerformanceBias(SingleDatasetCheck):
         if has_model_classes:
             subplot_grouping += ['_class']
         # Get distinct subplot categories with the largest observed differences
-        if len(subplot_grouping) > 0:
+        if subplot_grouping:
             subplots_categories = (
                 visual_df.sort_values('_diff', ascending=True)[subplot_grouping]
                 .drop_duplicates()
@@ -378,8 +377,8 @@ class PerformanceBias(SingleDatasetCheck):
         subplot_titles = ''
         if has_control:
             subplot_titles += f'{self.control_feature}=' + subplots_categories[self.control_feature]
-        if has_control and has_model_classes:
-            subplot_titles += ', model_class=' + subplots_categories['_class']
+            if has_model_classes:
+                subplot_titles += ', model_class=' + subplots_categories['_class']
         if has_model_classes and not has_control:
             subplot_titles = 'model_class=' + subplots_categories['_class']
 
@@ -392,14 +391,12 @@ class PerformanceBias(SingleDatasetCheck):
         )
 
         if subplots_categories is not None:
-            i = 0
-            for _, cat in subplots_categories.iterrows():
-                i += 1
+            for i, (_, cat) in enumerate(subplots_categories.iterrows(), start=1):
                 if has_control and not has_model_classes:
                     subset_i = visual_df[self.control_feature] == cat[self.control_feature]
                 elif has_model_classes and not has_control:
                     subset_i = visual_df['_class'] == cat['_class']
-                elif has_control and has_model_classes:
+                elif has_control:
                     subset_i = (visual_df[self.control_feature] == cat[self.control_feature]) & (
                         visual_df['_class'] == cat['_class']
                     )
@@ -425,15 +422,19 @@ class PerformanceBias(SingleDatasetCheck):
         n_subgroups_shown = min(n_subgroups, self.max_subgroups_per_control_cat_to_display)
         title += f'<br><sup>(Showing {n_subgroups_shown}/{n_subgroups} {self.protected_feature} categories'
         n_cat = 1
-        if has_control or has_model_classes:
+        if has_control:
             n_cat = len(visual_df[subplot_grouping].drop_duplicates())
             title += f' per subplot and {rows}/{n_cat} '
-            if has_control and not has_model_classes:
-                title += f'{self.control_feature}'
-            elif has_model_classes and not has_control:
-                title += 'model_classes'
-            else:
-                title += f'({self.control_feature}, model_classes)'
+            title += (
+                f'({self.control_feature}, model_classes)'
+                if has_model_classes
+                else f'{self.control_feature}'
+            )
+            title += ' categories'
+        elif has_model_classes:
+            n_cat = len(visual_df[subplot_grouping].drop_duplicates())
+            title += f' per subplot and {rows}/{n_cat} '
+            title += 'model_classes'
             title += ' categories'
         title += ')</sup>'
 

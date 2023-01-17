@@ -46,7 +46,7 @@ class CheckFailureSerializer(HtmlSerializer['check_types.CheckFailure']):
         """
         header = self.prepare_header()
         content = ''.join([header, self.prepare_summary(), self.prepare_error_message()])
-        if full_html is True:
+        if full_html:
             return (
                 '<html>'
                 f'<head><title>{header}</title></head>'

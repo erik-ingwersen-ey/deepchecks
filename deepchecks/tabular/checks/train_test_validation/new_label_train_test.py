@@ -71,9 +71,7 @@ class NewLabelTrainTest(TrainTestCheck, ReduceLabelMixin):
         unique_training_values = set(train_label.unique())
         unique_test_values = set(test_label.unique())
 
-        new_labels = unique_test_values.difference(unique_training_values)
-
-        if new_labels:
+        if new_labels := unique_test_values.difference(unique_training_values):
             new_labels = test_label[test_label.isin(new_labels)]
             n_new_label = len(new_labels)
             samples_per_label = dict(new_labels.value_counts())

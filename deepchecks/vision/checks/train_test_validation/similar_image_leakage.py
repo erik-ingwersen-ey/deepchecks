@@ -109,11 +109,6 @@ class SimilarImageLeakage(TrainTestCheck):
         display_indices = random.sample(range(len(similar_indices['test'])),
                                         min(self.n_top_show, len(similar_indices['test'])))
 
-        display_images = {
-            'train': [],
-            'test': []
-        }
-
         data_obj = {
             'train': context.train,
             'test': context.test
@@ -122,6 +117,11 @@ class SimilarImageLeakage(TrainTestCheck):
         display = []
         similar_pairs = []
         if similar_indices['test']:
+
+            display_images = {
+                'train': [],
+                'test': []
+            }
 
             # TODO: this for loop should be below `if context.with_display:` branch
             for similar_index in display_indices:
@@ -172,9 +172,9 @@ class SimilarImageLeakage(TrainTestCheck):
         """
 
         def condition(value: List[Tuple[int, int]]) -> ConditionResult:
-            num_similar_images = len(set(t[1] for t in value))
+            num_similar_images = len({t[1] for t in value})
             message = f'Number of similar images between train and test datasets: {num_similar_images}' \
-                if num_similar_images > 0 else 'Found 0 similar images between train and test datasets'
+                    if num_similar_images > 0 else 'Found 0 similar images between train and test datasets'
             category = ConditionCategory.PASS if num_similar_images <= threshold else ConditionCategory.FAIL
             return ConditionResult(category, message)
 

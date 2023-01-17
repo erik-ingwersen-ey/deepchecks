@@ -29,19 +29,20 @@ DOCS_EXAMPLES_DIR = ["checks/vision",
 def test_plots_on_gpu():
     """If there is GPU available running all the docs plot files. Only makes sure the plots don't crash, and not \
     testing any other display or functionality."""
-    if torch.cuda.is_available():
-        path = Path(__file__).parent.parent.parent.parent / "docs" / "source"
-        # Take only source file and excluding compiled files
-        source_files = set()
-        for dir in DOCS_EXAMPLES_DIR:
-            source_files.update(set(path.glob(f"**/{dir}/**/plot_*.py")))
+    if not torch.cuda.is_available():
+        return
+    path = Path(__file__).parent.parent.parent.parent / "docs" / "source"
+    # Take only source file and excluding compiled files
+    source_files = set()
+    for dir in DOCS_EXAMPLES_DIR:
+        source_files.update(set(path.glob(f"**/{dir}/**/plot_*.py")))
 
-        if not source_files:
-            raise ValueError("No plots found in docs/source")
-        for file in source_files:
-            print(f"plot file: {str(file)}")
-            start = time.time()
-            run_path(str(file))
-            end = time.time()
-            print(f"plot file: {str(file)}, Time: {end-start}")
+    if not source_files:
+        raise ValueError("No plots found in docs/source")
+    for file in source_files:
+        print(f"plot file: {str(file)}")
+        start = time.time()
+        run_path(str(file))
+        end = time.time()
+        print(f"plot file: {str(file)}, Time: {end-start}")
 

@@ -105,53 +105,6 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                step_size=3,
                                                gamma=0.1)
 
-if False:
-    num_epochs = 15
-    loss_list = []
-    for epoch in range(num_epochs):
-        print('Starting training....{}/{}'.format(epoch + 1, num_epochs))
-        loss_sub_list = []
-        start = time.time()
-        for images, targets in train_loader:
-            filtered_images = []
-            filtered_targets = []
-
-            for image, t in zip(images, targets):
-                if len(t['boxes']) > 0:
-                    filtered_images.append(image.to(device))
-                    filtered_targets.append({k: torch.stack(v).to(device) for k, v in t.items()})
-
-            images = filtered_images
-            targets = filtered_targets
-
-            model.train()
-            for target in targets:
-                if len(target["boxes"]) != len(target["labels"]):
-                    print("Error: Different number of boxes and labels in {}".format(target["image_id"]))
-                    exit()
-
-            loss_dict = model(images, targets)
-            losses = sum(loss for loss in loss_dict.values())
-            loss_value = losses.item()
-            loss_sub_list.append(loss_value)
-
-            # update optimizer and learning rate
-            optimizer.zero_grad()
-            losses.backward()
-            optimizer.step()
-            # lr_scheduler.step()
-        end = time.time()
-
-        # print the loss of epoch
-        epoch_loss = np.mean(loss_sub_list)
-        loss_list.append(epoch_loss)
-        print('Epoch {}/{} Loss: {:.4f} Time: {:.4f}'.format(epoch + 1, num_epochs, epoch_loss, end - start))
-
-    # save the model
-    torch.save(model.state_dict(), 'ssd_model.pth')
-
-    exit(0)
-
 model.load_state_dict(torch.load('ssd_model.pth'))
 
 model.eval()
@@ -188,7 +141,7 @@ class TomatoData(DetectionData):
     def infer_on_batch(self, batch, model, device):
         nm_thrs = 0.2
         score_thrs = 0.7
-        imgs = list(img.to(device) for img in batch[0])
+        imgs = [img.to(device) for img in batch[0]]
         with torch.no_grad():
             preds = model(imgs)
         processed_pred = []

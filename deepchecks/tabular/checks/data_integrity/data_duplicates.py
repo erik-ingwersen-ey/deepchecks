@@ -76,15 +76,13 @@ class DataDuplicates(SingleDatasetCheck):
         if n_samples == 0:
             raise DatasetValidationError('Dataset does not contain any data')
 
-        # HACK: pandas have bug with groupby on category dtypes, so until it fixed, change dtypes manually
-        category_columns = df.dtypes[df.dtypes == 'category'].index.tolist()
-        if category_columns:
+        if category_columns := df.dtypes[df.dtypes == 'category'].index.tolist():
             df = df.astype({c: 'object' for c in category_columns})
 
         group_unique_data = df[data_columns].groupby(data_columns, dropna=False).size()
         n_unique = len(group_unique_data)
 
-        percent_duplicate = 1 - (1.0 * int(n_unique)) / (1.0 * int(n_samples))
+        percent_duplicate = 1 - 1.0 * n_unique / (1.0 * int(n_samples))
 
         if context.with_display and percent_duplicate > 0:
             # patched for anonymous_series
@@ -99,12 +97,14 @@ class DataDuplicates(SingleDatasetCheck):
                 duplicates_counted.rename(columns={new_name: 0}, inplace=True)
 
             most_duplicates = duplicates_counted[duplicates_counted['Number of Duplicates'] > 1]. \
-                nlargest(self.n_to_show, ['Number of Duplicates'])
+                    nlargest(self.n_to_show, ['Number of Duplicates'])
 
-            indexes = []
-            for row in most_duplicates.iloc():
-                indexes.append(format_list(df.index[np.all(df == row[data_columns], axis=1)].to_list()))
-
+            indexes = [
+                format_list(
+                    df.index[np.all(df == row[data_columns], axis=1)].to_list()
+                )
+                for row in most_duplicates.iloc()
+            ]
             most_duplicates['Instances'] = indexes
 
             most_duplicates = most_duplicates.set_index(['Instances', 'Number of Duplicates'])

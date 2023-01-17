@@ -79,7 +79,7 @@ class ImageSegmentPerformance(SingleDatasetCheck):
         warnings.warn('The ImageSegmentPerformance check is deprecated and will be removed in the 0.11 version. '
                       'Please use the WeakSegmentsPerformance check instead.', DeprecationWarning)
 
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
         if alternative_metrics is not None:
             warnings.warn(f'{self.__class__.__name__}: alternative_metrics is deprecated. Please use scorers instead.',
                           DeprecationWarning)
@@ -148,7 +148,7 @@ class ImageSegmentPerformance(SingleDatasetCheck):
 
         for property_name, prop_bins in bins.items():
             # Calculate scale for the numbers formatting in the display of range
-            bins_scale = max([_get_range_scale(b['start'], b['stop']) for b in prop_bins])
+            bins_scale = max(_get_range_scale(b['start'], b['stop']) for b in prop_bins)
             # If we have a low number of unique values for a property, the first bin (-inf, x) might be empty so
             # check the count, and if empty filter out the bin
             prop_bins = list(filter(lambda x: x['count'] > 0, prop_bins))
@@ -166,8 +166,10 @@ class ImageSegmentPerformance(SingleDatasetCheck):
                 # we don't show single columns in the display
                 if context.with_display and len(prop_bins) > 1:
                     # For the plotly display need row per metric in the dataframe
-                    for metric, val in single_bin['metrics'].items():
-                        display_data.append({'Metric': metric, 'Value': val, **bin_data})
+                    display_data.extend(
+                        {'Metric': metric, 'Value': val, **bin_data}
+                        for metric, val in single_bin['metrics'].items()
+                    )
                 # Save for result
                 result_value[property_name].append(single_bin)
 
@@ -331,8 +333,8 @@ def _wrap_torch_or_list(value):
 
 
 def _range_string(start, stop, precision):
-    start = '[' + format_number(start, precision) if not np.isinf(start) else '(-inf'
-    stop = format_number(stop, precision) if not np.isinf(stop) else 'inf'
+    start = '(-inf' if np.isinf(start) else '[' + format_number(start, precision)
+    stop = 'inf' if np.isinf(stop) else format_number(stop, precision)
     return f'{start}, {stop})'
 
 

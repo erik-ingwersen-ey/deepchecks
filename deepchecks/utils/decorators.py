@@ -36,7 +36,7 @@ class DocStr(str):
         return DocStr(indent(self))
 
     def __format__(self, *args, **kwargs):
-        if len(args) == 0:
+        if not args:
             return super().__format__(*args, **kwargs)
 
         allowed_modifiers = {'dedent', 'indent'}
@@ -80,8 +80,7 @@ class Substitution:
 
     def __init__(self, **kwargs):
         self.params = {
-            k: DocStr(v) if not isinstance(v, DocStr) else v
-            for k, v in kwargs.items()
+            k: v if isinstance(v, DocStr) else DocStr(v) for k, v in kwargs.items()
         }
 
     def __call__(self, func: F) -> F:
@@ -92,10 +91,12 @@ class Substitution:
     def update(self, **kwargs) -> None:
         """Update self.params with supplied args."""
         if isinstance(self.params, dict):
-            self.params.update({
-                k: DocStr(v) if not isinstance(v, DocStr) else v
-                for k, v in kwargs.items()
-            })
+            self.params.update(
+                {
+                    k: v if isinstance(v, DocStr) else DocStr(v)
+                    for k, v in kwargs.items()
+                }
+            )
 
 
 class Appender:
@@ -121,16 +122,13 @@ class Appender:
     addendum: t.Optional[str]
 
     def __init__(self, addendum: t.Optional[str], join: str = '', indents: int = 0):
-        if indents > 0:
-            self.addendum = indent(addendum, indents=indents)
-        else:
-            self.addendum = addendum
+        self.addendum = indent(addendum, indents=indents) if indents > 0 else addendum
         self.join = join
 
     def __call__(self, func: F) -> F:
         """Decorate a function."""
-        func.__doc__ = func.__doc__ if func.__doc__ else ''
-        self.addendum = self.addendum if self.addendum else ''
+        func.__doc__ = func.__doc__ or ''
+        self.addendum = self.addendum or ''
         docitems = [func.__doc__, self.addendum]
         func.__doc__ = textwrap.dedent(self.join.join(docitems))
         return func
@@ -146,7 +144,7 @@ def indent(
     identation = ''.join((INDENT for _ in range(indents)))
     jointext = ''.join(('\n', identation))
     output = jointext.join(text.split('\n'))
-    return output if prefix is False else f'{identation}{output}'
+    return f'{identation}{output}' if prefix else output
 
 
 def deprecate_kwarg(
@@ -165,29 +163,32 @@ def deprecate_kwarg(
     def _deprecate_kwarg(func: F) -> F:
         @wraps(func)
         def wrapper(*args, **kwargs) -> t.Callable[..., t.Any]:
-            if old_name in kwargs and new_name in kwargs:
-                raise TypeError(
-                    f'Can only specify {repr(old_name)} '
-                    f'or {repr(new_name)}, not both'
-                )
-            elif old_name in kwargs and new_name is None:
-                get_logger().warning(
-                    'the %s keyword is deprecated and '
-                    'will be removed in a future version. Please take '
-                    'steps to stop the use of %s',
-                    repr(old_name),
-                    repr(old_name)
-                )
-            elif old_name in kwargs and new_name is not None:
-                get_logger().warning(
-                    'the %s keyword is deprecated, '
-                    'use %s instead',
-                    repr(old_name),
-                    repr(new_name)
-                )
-                kwargs[new_name] = kwargs.pop(old_name)
+            if old_name in kwargs:
+                if new_name in kwargs:
+                    raise TypeError(
+                        f'Can only specify {repr(old_name)} '
+                        f'or {repr(new_name)}, not both'
+                    )
+                elif new_name is None:
+                    get_logger().warning(
+                        'the %s keyword is deprecated and '
+                        'will be removed in a future version. Please take '
+                        'steps to stop the use of %s',
+                        repr(old_name),
+                        repr(old_name)
+                    )
+                elif new_name is not None:
+                    get_logger().warning(
+                        'the %s keyword is deprecated, '
+                        'use %s instead',
+                        repr(old_name),
+                        repr(new_name)
+                    )
+                    kwargs[new_name] = kwargs.pop(old_name)
             return func(*args, **kwargs)
+
         return t.cast(F, wrapper)
+
     return _deprecate_kwarg
 
 

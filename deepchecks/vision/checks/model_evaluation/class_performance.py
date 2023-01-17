@@ -83,7 +83,11 @@ class ClassPerformance(TrainTestCheck):
                                            f'["largest", "smallest", "random", "best", "worst"]')
 
             self.show_only = show_only
-            if alternative_metrics is not None and show_only in ['best', 'worst'] and metric_to_show_by is None:
+            if (
+                alternative_metrics is not None
+                and show_only in {'best', 'worst'}
+                and metric_to_show_by is None
+            ):
                 raise DeepchecksValueError('When alternative_metrics are provided and show_only is one of: '
                                            '["best", "worst"], metric_to_show_by must be specified.')
 
@@ -92,9 +96,11 @@ class ClassPerformance(TrainTestCheck):
 
     def initialize_run(self, context: Context):
         """Initialize run by creating the _state member with metrics for train and test."""
-        self._data_metrics = {}
-        self._data_metrics[DatasetKind.TRAIN] = get_scorers_dict(context.train,
-                                                                 alternative_scorers=self.alternative_metrics)
+        self._data_metrics = {
+            DatasetKind.TRAIN: get_scorers_dict(
+                context.train, alternative_scorers=self.alternative_metrics
+            )
+        }
         self._data_metrics[DatasetKind.TEST] = get_scorers_dict(context.train,
                                                                 alternative_scorers=self.alternative_metrics)
 

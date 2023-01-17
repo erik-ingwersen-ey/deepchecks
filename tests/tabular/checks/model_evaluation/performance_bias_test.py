@@ -50,9 +50,6 @@ def test_no_error(adult_split_dataset_and_model, avocado_split_dataset_and_model
     for task in tasks:
         run_task(*task)
 
-    # Assert
-    pass # no error
-
 
 def test_run_value_error(adult_split_dataset_and_model):
     # Arrange
@@ -268,11 +265,8 @@ def test_scorers_types_no_error(adult_split_dataset_and_model):
         ('f1_score', make_scorer(f1_score, average='micro')),
         {'f1_score': make_scorer(f1_score, average='micro')},
     ]
-    
+
     # Act
     for scorer in scorer_types:
         check = PerformanceBias("sex", scorer=scorer)
         check.run(test, model)
-
-    # Assert
-    pass # no error

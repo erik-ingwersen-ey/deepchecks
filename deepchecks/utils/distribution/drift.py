@@ -294,7 +294,7 @@ def calc_drift_and_plot(train_column: pd.Series,
         raise DeepchecksValueError(
             f'min_category_size_ratio expected a value in range [0, 1], instead got {min_category_size_ratio}.')
 
-    if column_type == 'categorical' and ignore_na is False:
+    if column_type == 'categorical' and not ignore_na:
         train_dist = np.array(train_column.values).reshape(-1)
         test_dist = np.array(test_column.values).reshape(-1)
     else:
@@ -305,25 +305,10 @@ def calc_drift_and_plot(train_column: pd.Series,
         raise NotEnoughSamplesError(f'For drift calculations a minimum of {min_samples} samples are needed but '
                                     f'got {len(train_dist)} for train and {len(test_dist)} for test')
 
-    if column_type == 'numerical':
-        scorer_name = 'Earth Mover\'s Distance'
-
-        train_dist = train_dist.astype('float')
-        test_dist = test_dist.astype('float')
-
-        score = earth_movers_distance(dist1=train_dist, dist2=test_dist, margin_quantile_filter=margin_quantile_filter)
-
-        if not with_display:
-            return score, scorer_name, None
-
-        bar_traces, bar_x_axis, bar_y_axis = drift_score_bar_traces(score)
-        dist_traces, dist_x_axis, dist_y_axis = feature_distribution_traces(train_dist, test_dist, value_name,
-                                                                            dataset_names=dataset_names)
-
-    elif column_type == 'categorical':
+    if column_type == 'categorical':
         sort_by = 'difference' if show_categories_by == 'largest_difference' else \
             ('dist1' if show_categories_by == 'train_largest' else 'dist2')
-        if categorical_drift_method.lower() in ['cramer_v', 'cramers_v']:
+        if categorical_drift_method.lower() in {'cramer_v', 'cramers_v'}:
             scorer_name = 'Cramer\'s V'
             score = cramers_v(train_dist, test_dist, min_category_size_ratio, max_num_categories_for_drift, sort_by)
         elif categorical_drift_method.lower() == 'psi':
@@ -342,6 +327,20 @@ def calc_drift_and_plot(train_column: pd.Series,
                                                                 max_num_categories=max_num_categories_for_display,
                                                                 show_categories_by=show_categories_by,
                                                                 dataset_names=dataset_names)
+    elif column_type == 'numerical':
+        train_dist = train_dist.astype('float')
+        test_dist = test_dist.astype('float')
+
+        score = earth_movers_distance(dist1=train_dist, dist2=test_dist, margin_quantile_filter=margin_quantile_filter)
+
+        scorer_name = 'Earth Mover\'s Distance'
+        if not with_display:
+            return score, scorer_name, None
+
+        bar_traces, bar_x_axis, bar_y_axis = drift_score_bar_traces(score)
+        dist_traces, dist_x_axis, dist_y_axis = feature_distribution_traces(train_dist, test_dist, value_name,
+                                                                            dataset_names=dataset_names)
+
     else:
         # Should never reach here
         raise DeepchecksValueError(f'Unsupported column type for drift: {column_type}')

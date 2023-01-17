@@ -173,6 +173,7 @@ def test_with_drift_rgb(coco_train_dataloader, coco_test_dataloader, device):
 
 def test_condition_fail(coco_train_dataloader, coco_test_dataloader, device):
     # Arrange
+
     class DriftCoco(COCOData):
         def batch_to_images(self, batch):
             return pil_drift_formatter(batch)
@@ -185,11 +186,14 @@ def test_condition_fail(coco_train_dataloader, coco_test_dataloader, device):
     result = check.run(train, test, random_state=42, device=device)
 
     # Assert
-    assert_that(result.conditions_results[0], equal_condition_result(
-        is_pass=False,
-        name=f'Drift score is less than 0.1',
-        details=f'Drift score 0.816 is not less than 0.1',
-        ))
+    assert_that(
+        result.conditions_results[0],
+        equal_condition_result(
+            is_pass=False,
+            name='Drift score is less than 0.1',
+            details='Drift score 0.816 is not less than 0.1',
+        ),
+    )
 
 
 def test_condition_pass(coco_train_dataloader, coco_test_dataloader, device):
@@ -201,8 +205,11 @@ def test_condition_pass(coco_train_dataloader, coco_test_dataloader, device):
     result = check.run(test, test, random_state=42, device=device)
 
     # Assert
-    assert_that(result.conditions_results[0], equal_condition_result(
-        is_pass=True,
-        name=f'Drift score is less than 0.3',
-        details=f'Drift score 0 is less than 0.3',
-        ))
+    assert_that(
+        result.conditions_results[0],
+        equal_condition_result(
+            is_pass=True,
+            name='Drift score is less than 0.3',
+            details='Drift score 0 is less than 0.3',
+        ),
+    )

@@ -85,7 +85,7 @@ def validate_extractors(dataset: VisionData, model, device=None, image_save_loca
         dataset.validate_label(batch)
         labels = dataset.batch_to_labels(batch)
     except ValidationError as ex:
-        label_formatter_error = 'Fail! ' + str(ex)
+        label_formatter_error = f'Fail! {str(ex)}'
     except Exception:  # pylint: disable=broad-except
         label_formatter_error = 'Got exception \n' + traceback.format_exc()
 
@@ -93,7 +93,7 @@ def validate_extractors(dataset: VisionData, model, device=None, image_save_loca
         dataset.validate_image_data(batch)
         images = dataset.batch_to_images(batch)
     except ValidationError as ex:
-        image_formatter_error = 'Fail! ' + str(ex)
+        image_formatter_error = f'Fail! {str(ex)}'
     except Exception:  # pylint: disable=broad-except
         image_formatter_error = 'Got exception \n' + traceback.format_exc()
 
@@ -148,9 +148,9 @@ def validate_extractors(dataset: VisionData, model, device=None, image_save_loca
 
     line_break = '<br>' if is_notebook() else '\n'
     msg = get_header('Structure validation')
-    msg += f'Label formatter: {label_formatter_error if label_formatter_error else "Pass!"}{line_break}'
-    msg += f'Prediction formatter: {prediction_formatter_error if prediction_formatter_error else "Pass!"}{line_break}'
-    msg += f'Image formatter: {image_formatter_error if image_formatter_error else "Pass!"}{line_break}'
+    msg += f'Label formatter: {label_formatter_error or "Pass!"}{line_break}'
+    msg += f'Prediction formatter: {prediction_formatter_error or "Pass!"}{line_break}'
+    msg += f'Image formatter: {image_formatter_error or "Pass!"}{line_break}'
     msg += line_break
     msg += get_header('Content validation')
     msg += 'For validating the content within the structure you have to manually observe the classes, image, label ' \
@@ -179,10 +179,7 @@ def validate_extractors(dataset: VisionData, model, device=None, image_save_loca
         if image:
             if is_headless():
                 if save_images:
-                    if image_save_location is None:
-                        save_loc = os.getcwd()
-                    else:
-                        save_loc = image_save_location
+                    save_loc = os.getcwd() if image_save_location is None else image_save_location
                     full_image_path = os.path.join(save_loc, 'deepchecks_formatted_image.jpg')
                     full_image_path = create_new_file_name(full_image_path)
                     image.save(full_image_path)
@@ -196,7 +193,8 @@ def validate_extractors(dataset: VisionData, model, device=None, image_save_loca
             else:
                 image.show()
 
-    if label_formatter_error or prediction_formatter_error or image_formatter_error:
-        return False
-    else:
-        return True
+    return (
+        not label_formatter_error
+        and not prediction_formatter_error
+        and not image_formatter_error
+    )
