@@ -76,11 +76,7 @@ class CustomClassificationScorer(Metric):
             y_proba = y_proba.cpu().detach().numpy()
         else:
             y_proba = np.array(y_proba)
-        if isinstance(y, torch.Tensor):
-            y = y.cpu().detach().numpy()
-        else:
-            y = np.array(y)
-
+        y = y.cpu().detach().numpy() if isinstance(y, torch.Tensor) else np.array(y)
         self._y_proba.append(y_proba)
         self._y.append(y)
 

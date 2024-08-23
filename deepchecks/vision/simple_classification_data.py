@@ -87,7 +87,7 @@ def classification_dataset_from_directory(
         roots_of_datasets.append(root_path.joinpath('train'))
     if root_path.joinpath('test').exists():
         roots_of_datasets.append(root_path.joinpath('test'))
-    if len(roots_of_datasets) == 0:
+    if not roots_of_datasets:
         roots_of_datasets.append(root_path)
 
     result = []

@@ -40,10 +40,7 @@ class DeepchecksFilter:
     """
 
     def __init__(self, filter_functions: List[Callable] = None, label: str = ''):
-        if not filter_functions:
-            self.filter_functions = []
-        else:
-            self.filter_functions = filter_functions
+        self.filter_functions = filter_functions or []
         self.label = label
 
     def filter(self, dataframe: pd.DataFrame) -> pd.DataFrame:

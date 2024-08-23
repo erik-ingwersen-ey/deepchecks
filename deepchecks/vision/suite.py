@@ -193,8 +193,8 @@ class Suite(BaseSuite):
 
         batches_pbar = progressbar_factory.create(
             iterable=vision_data,
-            name='Ingesting Batches' + type_suffix,
-            unit='Batch'
+            name=f'Ingesting Batches{type_suffix}',
+            unit='Batch',
         )
 
         # Run on all the batches
@@ -206,17 +206,17 @@ class Suite(BaseSuite):
                 if check_idx in results:
                     continue
                 try:
-                    if isinstance(check, TrainTestCheck):
-                        if run_train_test_checks is True:
-                            check.update(context, batch, dataset_kind=dataset_kind)
-                        else:
-                            msg = 'Check is irrelevant if not supplied with both train and test datasets'
-                            results[check_idx] = self._get_unsupported_failure(check, msg)
-                    elif isinstance(check, SingleDatasetCheck):
+                    if (
+                        isinstance(check, TrainTestCheck)
+                        and run_train_test_checks
+                        or not isinstance(check, TrainTestCheck)
+                        and isinstance(check, SingleDatasetCheck)
+                    ):
                         check.update(context, batch, dataset_kind=dataset_kind)
-                    elif isinstance(check, ModelOnlyCheck):
-                        pass
-                    else:
+                    elif isinstance(check, TrainTestCheck):
+                        msg = 'Check is irrelevant if not supplied with both train and test datasets'
+                        results[check_idx] = self._get_unsupported_failure(check, msg)
+                    elif not isinstance(check, ModelOnlyCheck):
                         raise TypeError(f'Don\'t know how to handle type {check.__class__.__name__} in suite.')
                 except Exception as exp:
                     results[check_idx] = CheckFailure(check, exp, type_suffix)
@@ -226,8 +226,8 @@ class Suite(BaseSuite):
         if single_dataset_checks:
             checks_pbar = progressbar_factory.create(
                 iterable=list(single_dataset_checks.items()),
-                name='Computing Single Dataset Checks' + type_suffix,
-                unit='Check'
+                name=f'Computing Single Dataset Checks{type_suffix}',
+                unit='Check',
             )
             for idx, check in checks_pbar:
                 checks_pbar.set_postfix({'Check': check.name()}, refresh=False)

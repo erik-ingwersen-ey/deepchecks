@@ -77,19 +77,21 @@ class RegressionErrorDistribution(SingleDatasetCheck):
         y_test = dataset.label_col
 
         y_pred = model.predict(dataset.features_columns)
-        y_pred = pd.Series(y_pred, name='predicted ' + str(dataset.label_name), index=y_test.index)
+        y_pred = pd.Series(
+            y_pred, name=f'predicted {str(dataset.label_name)}', index=y_test.index
+        )
 
         diff = y_test - y_pred
         kurtosis_value = kurtosis(diff)
 
         if context.with_display:
             n_largest_diff = diff.nlargest(self.n_top_samples)
-            n_largest_diff.name = str(dataset.label_name) + ' Prediction Difference'
+            n_largest_diff.name = f'{str(dataset.label_name)} Prediction Difference'
             n_largest = pd.concat([dataset.data.loc[n_largest_diff.index], y_pred.loc[n_largest_diff.index],
                                    n_largest_diff], axis=1)
 
             n_smallest_diff = diff.nsmallest(self.n_top_samples)
-            n_smallest_diff.name = str(dataset.label_name) + ' Prediction Difference'
+            n_smallest_diff.name = f'{str(dataset.label_name)} Prediction Difference'
             n_smallest = pd.concat([dataset.data.loc[n_smallest_diff.index], y_pred.loc[n_smallest_diff.index],
                                     n_smallest_diff], axis=1)
             fig = px.histogram(

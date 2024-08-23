@@ -9,6 +9,7 @@
 # ----------------------------------------------------------------------------
 #
 """Utils module containing utilities for checks working with scorers."""
+
 import logging
 import typing as t
 import warnings
@@ -163,10 +164,12 @@ multiclass_scorers_dict = {
     'jaccard_per_class': make_scorer(jaccard_score, average=None, zero_division=0),
 }
 
-_str_to_scorer_dict = {**regression_scorers_higher_is_better_dict,
-                       **regression_scorers_lower_is_better_dict,
-                       **multiclass_scorers_dict,
-                       **binary_scorers_dict}
+_str_to_scorer_dict = (
+    regression_scorers_higher_is_better_dict
+    | regression_scorers_lower_is_better_dict
+    | multiclass_scorers_dict
+    | binary_scorers_dict
+)
 
 SUPPORTED_MODELS_DOCLINK = doclink('supported-prediction-format',
                                    template='For more information please refer to the Supported Models guide {link}')
@@ -196,7 +199,7 @@ class DeepcheckScorer:
                  name: str = None):
         if isinstance(scorer, str):
             formatted_scorer_name = scorer.lower().replace('sensitivity', 'recall').replace('specificity', 'tnr') \
-                .replace(' ', '_')
+                    .replace(' ', '_')
             if formatted_scorer_name in regression_scorers_lower_is_better_dict:
                 warnings.warn(f'Deepchecks checks assume higher metric values represent better performance. '
                               f'{formatted_scorer_name} does not follow that convention.')
@@ -212,9 +215,9 @@ class DeepcheckScorer:
             self.scorer = scorer
         else:
             scorer_type = type(scorer).__name__
-            msg = f'Scorer {name if name else ""} value should be either a callable or string but got: {scorer_type}'
+            msg = f'Scorer {name or ""} value should be either a callable or string but got: {scorer_type}'
             raise errors.DeepchecksValueError(msg)
-        self.name = name if name else get_scorer_name(scorer)
+        self.name = name or get_scorer_name(scorer)
         self.model_classes = model_classes
         self.observed_classes = observed_classes
 
@@ -304,23 +307,22 @@ class DeepcheckScorer:
         try:
             scores = self.scorer(model, data, np.array(label_col))
         except ValueError as e:
-            if getattr(self.scorer, '_score_func', '').__name__ == 'roc_auc_score':
-                get_logger().warning('ROC AUC failed with error message - "%s". setting scores as None', e,
-                                     exc_info=get_logger().level == logging.DEBUG)
-                scores = None
-            else:
+            if getattr(self.scorer, '_score_func', '').__name__ != 'roc_auc_score':
                 raise
 
+            get_logger().warning('ROC AUC failed with error message - "%s". setting scores as None', e,
+                                 exc_info=get_logger().level == logging.DEBUG)
+            scores = None
         # The scores returned are for the model classes but we want scores of the observed classes
         if self.model_classes is not None and isinstance(scores, t.Sized):
             if len(scores) != len(self.model_classes):
                 raise errors.DeepchecksValueError(
                     f'Scorer returned {len(scores)} scores, but model contains '
                     f'{len(self.model_classes)} classes. Can\'t proceed')
-            scores = dict(zip(self.model_classes, scores))
-            # Add classes which been seen in the data but are not known to the model
-            scores.update({cls: np.nan for cls in set(self.observed_classes) - set(self.model_classes)})
-
+            scores = dict(zip(self.model_classes, scores)) | {
+                cls: np.nan
+                for cls in set(self.observed_classes) - set(self.model_classes)
+            }
         return scores
 
     def __call__(self, model, dataset: 'tabular.Dataset'):
@@ -372,7 +374,9 @@ def get_default_scorers(model_type, class_avg: bool = True):
     class_avg : bool, default True
         for classification whether to return scorers of average score or per class
     """
-    return_array = model_type in [TaskType.MULTICLASS, TaskType.BINARY] and class_avg is False
+    return_array = (
+        model_type in [TaskType.MULTICLASS, TaskType.BINARY] and not class_avg
+    )
 
     if return_array:
         return MULTICLASS_SCORERS_NON_AVERAGE

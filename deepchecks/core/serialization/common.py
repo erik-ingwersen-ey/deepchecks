@@ -178,7 +178,7 @@ def aggregate_conditions(
     df.sort_values(by=['$priority'], inplace=True)
     df.drop('$priority', axis=1, inplace=True)
 
-    if include_check_name is False:
+    if not include_check_name:
         df.drop('Check', axis=1, inplace=True)
 
     df['More Info'] = df['More Info'].map(lambda x: get_ellipsis(x, max_info_len))
@@ -287,7 +287,7 @@ def plotlyjs_script(connected: bool = True) -> str:
     -------
     str
     """
-    if connected is True:
+    if connected:
         # Connected so we configure requirejs with the plotly CDN
         script = textwrap.dedent("""
             {win_config}

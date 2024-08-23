@@ -62,7 +62,7 @@ class ModelInferenceTime(SingleDatasetCheck):
 
         prediction_method = model.predict  # type: ignore
 
-        n_samples = len(df) if len(df) < self.n_samples else self.n_samples
+        n_samples = min(len(df), self.n_samples)
         df = df.sample(n=n_samples, random_state=self.random_state)
 
         result = timeit.timeit(

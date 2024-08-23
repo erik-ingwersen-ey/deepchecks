@@ -349,7 +349,7 @@ class VisionData:
     def label_id_to_name(self, class_id: int) -> str:
         """Return the name of the class with the given id."""
         # Converting the class_id to integer to make sure it is an integer
-        class_id = int(class_id)
+        class_id = class_id
 
         if self._label_map is None:
             return str(class_id)
@@ -517,8 +517,7 @@ class VisionData:
             The validation result.
         """
         from deepchecks.vision.utils.validation import validate_extractors  # pylint: disable=import-outside-toplevel
-        validation_result = validate_extractors(self, model, device=device)
-        return validation_result
+        return validate_extractors(self, model, device=device)
 
     def __iter__(self):
         """Return an iterator over the dataset."""
@@ -598,10 +597,11 @@ class VisionData:
                      'worker_init_fn',
                      'prefetch_factor',
                      'persistent_workers']
-        aval_attr = {}
-        for attr in attr_list:
-            if hasattr(data_loader, attr):
-                aval_attr[attr] = getattr(data_loader, attr)
+        aval_attr = {
+            attr: getattr(data_loader, attr)
+            for attr in attr_list
+            if hasattr(data_loader, attr)
+        }
         aval_attr['dataset'] = copy(data_loader.dataset)
         return aval_attr
 

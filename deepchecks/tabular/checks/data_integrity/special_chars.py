@@ -79,9 +79,7 @@ class SpecialCharacters(SingleDatasetCheck):
 
         for column_name in df.columns:
             column_data = df[column_name]
-            # Get dict of samples to count
-            special_samples = _get_special_samples(column_data)
-            if special_samples:
+            if special_samples := _get_special_samples(column_data):
                 result[column_name] = sum(special_samples.values()) / column_data.size
                 if context.with_display:
                     percent = format_percent(sum(special_samples.values()) / column_data.size)

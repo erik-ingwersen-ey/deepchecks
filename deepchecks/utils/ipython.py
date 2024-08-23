@@ -168,15 +168,14 @@ class HtmlProgressBar:
         self._disable = disable
         self._reuse_counter = 0
 
-        if disable is False and display_immediately is True:
+        if not disable and display_immediately:
             self.refresh()
 
     def __iter__(self):
         """Iterate over iterable."""
         if self._disable is True:
             try:
-                for it in self._iterable:
-                    yield it
+                yield from self._iterable
             finally:
                 self._reuse_counter += 1
             return
@@ -230,13 +229,13 @@ class HtmlProgressBar:
     def reset_metadata(self, data: t.Mapping[str, t.Any], refresh: bool = True):
         """Reset metadata."""
         self._metadata = dict(data)
-        if refresh is True:
+        if refresh:
             self.refresh()
 
     def update_metadata(self, data: t.Mapping[str, t.Any], refresh: bool = True):
         """Update metadata."""
         self._metadata.update(data)
-        if refresh is True:
+        if refresh:
             self.refresh()
 
     @classmethod
@@ -318,19 +317,18 @@ def create_progress_bar(
             display_immediately=True,
             disable=is_disabled
         )
-    else:
-        barlen = iterlen if iterlen > 5 else 5
-        rbar = ' {n_fmt}/{total_fmt} [Time: {elapsed}{postfix}]'
-        bar_format = f'{{desc}}:\n|{{bar:{barlen}}}|{rbar}'
-        return tqdm.tqdm(
-            iterable=iterable,
-            total=total,
-            desc=name,
-            unit=f' {unit}',
-            leave=False,
-            bar_format=bar_format,
-            disable=is_disabled,
-        )
+    barlen = max(iterlen, 5)
+    rbar = ' {n_fmt}/{total_fmt} [Time: {elapsed}{postfix}]'
+    bar_format = f'{{desc}}:\n|{{bar:{barlen}}}|{rbar}'
+    return tqdm.tqdm(
+        iterable=iterable,
+        total=total,
+        desc=name,
+        unit=f' {unit}',
+        leave=False,
+        bar_format=bar_format,
+        disable=is_disabled,
+    )
 
 
 class DummyProgressBar:
@@ -349,8 +347,6 @@ class DummyProgressBar:
 
     def __exit__(self, *args, **kwargs):
         """Exit context."""
-        for _ in self.pb:
-            pass
 
 
 class ProgressBarGroup:

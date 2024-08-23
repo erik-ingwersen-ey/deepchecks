@@ -125,13 +125,12 @@ class PercentOfNulls(SingleDatasetCheck, ReduceFeatureMixin):
                 return ConditionResult(ConditionCategory.FAIL,
                                        f'Found {len(failing)} columns with ratio '
                                        f'of nulls above threshold: \n{dict(failing)}')
-            else:
-                details = get_condition_passed_message(len(result))
-                if any(result['Percent of nulls in sample'] > 0):
-                    features_with_null = result[result['Percent of nulls in sample'] > 0]
-                    value_for_print = dict(features_with_null['Percent of nulls in sample'].apply(format_percent)[:5])
-                    details += f'. Top columns with null ratio: \n{value_for_print}'
-                return ConditionResult(ConditionCategory.PASS, details)
+            details = get_condition_passed_message(len(result))
+            if any(result['Percent of nulls in sample'] > 0):
+                features_with_null = result[result['Percent of nulls in sample'] > 0]
+                value_for_print = dict(features_with_null['Percent of nulls in sample'].apply(format_percent)[:5])
+                details += f'. Top columns with null ratio: \n{value_for_print}'
+            return ConditionResult(ConditionCategory.PASS, details)
 
         return self.add_condition(
             f'Percent of null values in each column is not greater than {format_percent(threshold)}', condition)

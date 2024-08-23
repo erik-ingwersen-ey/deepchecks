@@ -96,7 +96,7 @@ class ImagePropertyDrift(TrainTestCheck, ReducePropertyMixin):
             **kwargs
     ):
         super().__init__(**kwargs)
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
         self.margin_quantile_filter = margin_quantile_filter
         self.max_num_categories_for_drift = max_num_categories_for_drift
         self.min_category_size_ratio = min_category_size_ratio
@@ -163,13 +163,14 @@ class ImagePropertyDrift(TrainTestCheck, ReducePropertyMixin):
             raise RuntimeError('Internal Error! Vision check was used improperly.')
 
         # if self.classes_to_display is set, check that it has classes that actually exist
-        if self.classes_to_display is not None:
-            if not set(self.classes_to_display).issubset(
-                    map(self._class_to_string, context.train.classes_indices.keys())
-            ):
-                raise DeepchecksValueError(
-                    f'Provided list of class ids to display {self.classes_to_display} not found in training dataset.'
-                )
+        if self.classes_to_display is not None and not set(
+            self.classes_to_display
+        ).issubset(
+            map(self._class_to_string, context.train.classes_indices.keys())
+        ):
+            raise DeepchecksValueError(
+                f'Provided list of class ids to display {self.classes_to_display} not found in training dataset.'
+            )
 
         properties = sorted(self._train_properties.keys())
         df_train = pd.DataFrame(self._train_properties)
@@ -230,9 +231,7 @@ class ImagePropertyDrift(TrainTestCheck, ReducePropertyMixin):
             displays = []
 
         return CheckResult(
-            value=drifts if drifts else {},
-            display=displays,
-            header='Image Property Drift'
+            value=drifts or {}, display=displays, header='Image Property Drift'
         )
 
     def reduce_output(self, check_result: CheckResult) -> t.Dict[str, float]:
@@ -263,7 +262,7 @@ class ImagePropertyDrift(TrainTestCheck, ReducePropertyMixin):
                 for property_name, drift_score in result.items()
                 if drift_score >= max_allowed_drift_score
             ]
-            if len(failed_properties) > 0:
+            if failed_properties:
                 failed_properties = ';\n'.join(f'{p}={format_number(d)}' for p, d in failed_properties)
                 return ConditionResult(
                     ConditionCategory.FAIL,

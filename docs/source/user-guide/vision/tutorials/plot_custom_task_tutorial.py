@@ -90,13 +90,15 @@ class CocoInstanceSegmentationDataset(VisionDataset):
             labels.append(label if label.exists() else None)
 
         assert len(images) != 0, 'Did not find folder with images or it was empty'
-        assert not all(l is None for l in labels), 'Did not find folder with labels or it was empty'
+        assert any(
+            l is not None for l in labels
+        ), 'Did not find folder with labels or it was empty'
 
         train_len = int(self.TRAIN_FRACTION * len(images))
 
-        if self.train is True:
-            self.images = images[0:train_len]
-            self.labels = labels[0:train_len]
+        if self.train:
+            self.images = images[:train_len]
+            self.labels = labels[:train_len]
         else:
             self.images = images[train_len:]
             self.labels = labels[train_len:]
@@ -235,8 +237,7 @@ class MyCustomInstanceSegmentationData(VisionData):
 
     def infer_on_batch(self, batch, model, device):
         """Infer on a batch of images. Must return an iterable with an element per image."""
-        predictions = model.to(device)(batch[0])
-        return predictions
+        return model.to(device)(batch[0])
 
     def batch_to_images(self, batch) -> Sequence[np.ndarray]:
         """Convert the batch to a list of images as (H, W, C) 3D numpy array per image."""
@@ -282,8 +283,7 @@ def number_of_detections(labels) -> List[int]:
 
 def classes_in_labels(labels: List[torch.Tensor]) -> List[int]:
     """Return a list containing the classes in batch."""
-    classes = [x[0] for x in labels]
-    return classes
+    return [x[0] for x in labels]
 
 
 # We will pass this object as parameter to checks that are using label properties

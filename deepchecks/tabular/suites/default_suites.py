@@ -109,7 +109,7 @@ def data_integrity(columns: Union[Hashable, List[Hashable]] = None,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
 
     return Suite(
         'Data Integrity Suite',
@@ -207,7 +207,7 @@ def train_test_validation(columns: Union[Hashable, List[Hashable]] = None,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
     return Suite(
         'Train Test Validation Suite',
         DatasetsSizeComparison(**kwargs).add_condition_test_train_size_ratio_greater_than(),
@@ -306,7 +306,7 @@ def model_evaluation(alternative_scorers: Dict[str, Callable] = None,
     args = locals()
     args.pop('kwargs')
     non_none_args = {k: v for k, v in args.items() if v is not None}
-    kwargs = {**non_none_args, **kwargs}
+    kwargs = non_none_args | kwargs
 
     return Suite(
         'Model Evaluation Suite',

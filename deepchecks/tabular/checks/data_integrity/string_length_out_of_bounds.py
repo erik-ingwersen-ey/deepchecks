@@ -127,11 +127,13 @@ class StringLengthOutOfBounds(SingleDatasetCheck):
                 quantile_values = np.percentile(string_length_column, quantile_list, interpolation='nearest')
                 percentile_histogram = dict(zip(quantile_list, list(quantile_values)))
 
-            outlier_sections = outlier_on_percentile_histogram(percentile_histogram, self.inner_quantile_range,
-                                                               self.outlier_factor)
-            if outlier_sections:
+            if outlier_sections := outlier_on_percentile_histogram(
+                percentile_histogram,
+                self.inner_quantile_range,
+                self.outlier_factor,
+            ):
                 quantiles_not_in_section = \
-                    [x for x in quantile_list if all((not _in_range(x, a, b)) for a, b in outlier_sections)]
+                        [x for x in quantile_list if all((not _in_range(x, a, b)) for a, b in outlier_sections)]
                 non_outlier_section = (min(quantiles_not_in_section), max(quantiles_not_in_section))
 
                 non_outlier_lower_limit = percentile_histogram[non_outlier_section[0]]
@@ -284,7 +286,7 @@ def outlier_on_percentile_histogram(percentile_histogram: Dict[float, float], iq
     Tuple[Tuple[float, float]]
         percent ranges in the histogram that are outliers, empty tuple if none is found
     """
-    if any((k < 0) or k > 100 for k in percentile_histogram.keys()):
+    if any((k < 0) or k > 100 for k in percentile_histogram):
         raise ValueError('dict keys must be percentiles between 0 and 100')
     if any((v < 0) for v in percentile_histogram.values()):
         raise ValueError('dict values must be counts that are non-negative numbers')
@@ -320,6 +322,4 @@ def _in_range(x, a, b):
 
 
 def trim(x, max_length):
-    if len(x) <= max_length:
-        return x
-    return x[:max_length] + '...'
+    return x if len(x) <= max_length else x[:max_length] + '...'

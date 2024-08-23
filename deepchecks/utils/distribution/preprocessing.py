@@ -107,10 +107,7 @@ class ScaledNumerics(TransformerMixin, BaseEstimator):
     @staticmethod
     def _impute_whole_series_to_zero(s: pd.Series):
         """If given series contains only nones, return instead series with only zeros."""
-        if s.isna().all():
-            return pd.Series(np.zeros(s.shape))
-        else:
-            return s
+        return pd.Series(np.zeros(s.shape)) if s.isna().all() else s
 
 
 def preprocess_2_cat_cols_to_same_bins(dist1: Union[np.ndarray, pd.Series], dist2: Union[np.ndarray, pd.Series],
@@ -213,5 +210,4 @@ def value_frequency(x: Union[List, np.ndarray, pd.Series]) -> List[float]:
     """
     x_values_counter = Counter(x)
     total_occurrences = len(x)
-    values_probabilities = list(map(lambda n: n / total_occurrences, x_values_counter.values()))
-    return values_probabilities
+    return list(map(lambda n: n / total_occurrences, x_values_counter.values()))

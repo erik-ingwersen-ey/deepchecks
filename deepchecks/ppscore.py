@@ -69,10 +69,7 @@ def _calculate_model_cv_score_(
     if task["type"] == "classification":
         label_encoder = preprocessing.LabelEncoder()
         df[target] = label_encoder.fit_transform(df[target])
-        target_series = df[target]
-    else:
-        target_series = df[target]
-
+    target_series = df[target]
     # preprocess feature
     if _dtype_represents_categories(df[feature]):
         one_hot_encoder = preprocessing.OneHotEncoder()
@@ -101,10 +98,7 @@ def _normalized_mae_score(model_mae, naive_mae):
     # 10, 5 ==> 0 because worse than naive
     # 10, 20 ==> 0.5
     # 5, 20 ==> 0.75 = 1 - (mae/base_mae)
-    if model_mae > naive_mae:
-        return 0
-    else:
-        return 1 - (model_mae / naive_mae)
+    return 0 if model_mae > naive_mae else 1 - (model_mae / naive_mae)
 
 
 def _mae_normalizer(df, y, model_score, **kwargs):
@@ -118,17 +112,11 @@ def _mae_normalizer(df, y, model_score, **kwargs):
 
 def _normalized_f1_score(model_f1, baseline_f1):
     """Normalize the model F1 score, given the baseline score."""
-    # # F1 ranges from 0 to 1
-    # # 1 is best
-    # 0.5, 0.7 ==> 0 because model is worse than naive baseline
-    # 0.75, 0.5 ==> 0.5
-    #
     if model_f1 < baseline_f1:
         return 0
-    else:
-        scale_range = 1.0 - baseline_f1  # eg 0.3
-        f1_diff = model_f1 - baseline_f1  # eg 0.1
-        return f1_diff / scale_range  # 0.1/0.3 = 0.33
+    scale_range = 1.0 - baseline_f1  # eg 0.3
+    f1_diff = model_f1 - baseline_f1  # eg 0.1
+    return f1_diff / scale_range  # 0.1/0.3 = 0.33
 
 
 def _f1_normalizer(df, y, model_score, random_seed):
@@ -469,22 +457,21 @@ def score(
             catch_errors,
         )
     except Exception as exception:
-        if catch_errors:
-            case_type = "unknown_error"
-            task = _get_task(case_type, invalid_score)
-            return {
-                "x": x,
-                "y": y,
-                "ppscore": task["ppscore"],
-                "case": case_type,
-                "is_valid_score": task["is_valid_score"],
-                "metric": task["metric_name"],
-                "baseline_score": task["baseline_score"],
-                "model_score": task["model_score"],  # sklearn returns negative mae
-                "model": task["model"],
-            }
-        else:
+        if not catch_errors:
             raise exception
+        case_type = "unknown_error"
+        task = _get_task(case_type, invalid_score)
+        return {
+            "x": x,
+            "y": y,
+            "ppscore": task["ppscore"],
+            "case": case_type,
+            "is_valid_score": task["is_valid_score"],
+            "metric": task["metric_name"],
+            "baseline_score": task["baseline_score"],
+            "model_score": task["model_score"],  # sklearn returns negative mae
+            "model": task["model"],
+        }
 
 
 def _get_task(case_type, invalid_score):
@@ -572,11 +559,11 @@ def predictors(df, y: Hashable, output="df", sorted=True, **kwargs):
         raise AssertionError(
             f"The dataframe has {len(df[[y]].columns)} columns with the same column name {y}\nPlease adjust the dataframe and make sure that only 1 column has the name {y}"
         )
-    if not output in ["df", "list"]:
+    if output not in ["df", "list"]:
         raise ValueError(
             f"""The 'output' argument should be one of ["df", "list"] but you passed: {output}\nPlease adjust your input to one of the valid values"""
         )
-    if not sorted in [True, False]:
+    if sorted not in [True, False]:
         raise ValueError(
             f"""The 'sorted' argument should be one of [True, False] but you passed: {sorted}\nPlease adjust your input to one of the valid values"""
         )
@@ -610,11 +597,11 @@ def matrix(df, output="df", sorted=False, **kwargs):
         raise TypeError(
             f"The 'df' argument should be a pandas.DataFrame but you passed a {type(df)}\nPlease convert your input to a pandas.DataFrame"
         )
-    if not output in ["df", "list"]:
+    if output not in ["df", "list"]:
         raise ValueError(
             f"""The 'output' argument should be one of ["df", "list"] but you passed: {output}\nPlease adjust your input to one of the valid values"""
         )
-    if not sorted in [True, False]:
+    if sorted not in [True, False]:
         raise ValueError(
             f"""The 'sorted' argument should be one of [True, False] but you passed: {sorted}\nPlease adjust your input to one of the valid values"""
         )

@@ -506,7 +506,9 @@ def test_custom_task(mnist_train_custom_task, mnist_test_custom_task, mock_train
 def test_coco_thershold_scorer_list_strings(coco_train_visiondata, coco_test_visiondata,
                                             mock_trained_yolov5_object_detection, device):
     # Arrange
-    scorers = [name + '_per_class' for name in AVAILABLE_EVALUATING_FUNCTIONS.keys()]
+    scorers = [
+        f'{name}_per_class' for name in AVAILABLE_EVALUATING_FUNCTIONS.keys()
+    ]
     check = ClassPerformance(scorers=scorers)
     # Act
     result = check.run(coco_train_visiondata, coco_test_visiondata,
@@ -521,7 +523,10 @@ def test_coco_deepchecks_scorer_list_strings_averaging(coco_train_visiondata, co
                                                    mock_trained_yolov5_object_detection, device):
     for avg_method in ['macro', 'micro', 'weighted']:
         # Arrange
-        scorers = [name + '_' + avg_method for name in AVAILABLE_EVALUATING_FUNCTIONS.keys()]
+        scorers = [
+            f'{name}_{avg_method}'
+            for name in AVAILABLE_EVALUATING_FUNCTIONS.keys()
+        ]
         check = ClassPerformance(scorers=scorers)
         # Act
         result = check.run(coco_train_visiondata, coco_test_visiondata,

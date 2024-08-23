@@ -176,19 +176,11 @@ def test_nested_display_map_serialization_to_html():
 
 
 def is_display_map_sections(*section_names):
-    assert len(section_names) != 0
-    patterns = []
-
-    for name in section_names:
-        patterns.append(
-            r"<details>[\s]*"
-            r"<summary>[\s]*"
-            fr"<strong>{name}<\/strong>[\s]*"
-            r"<\/summary>[\s]*"
-            r"<div([\s\S\d\D\w\W]*)>([\s\S\d\D\w\W]*)<\/div>[\s]*"
-            r"<\/details>"
-        )
-
+    assert section_names
+    patterns = [
+        f"<details>[\s]*<summary>[\s]*<strong>{name}<\/strong>[\s]*<\/summary>[\s]*<div([\s\S\d\D\w\W]*)>([\s\S\d\D\w\W]*)<\/div>[\s]*<\/details>"
+        for name in section_names
+    ]
     pattern = r'[\s]*'.join(patterns)
     pattern = rf'^[\s]*{pattern}[\s]*$'
 
@@ -277,10 +269,8 @@ def test_json_serializer_initialization():
 
 def test_json_serializer_initialization_with_incorrect_type_of_value():
     assert_that(
-        calling(JsonSerializer).with_args(dict()),
-        raises(
-            TypeError,
-            'Expected "CheckResult" but got "dict"')
+        calling(JsonSerializer).with_args({}),
+        raises(TypeError, 'Expected "CheckResult" but got "dict"'),
     )
 
 
@@ -434,10 +424,8 @@ def test_junit_serializer_initialization():
 
 def test_junit_serializer_initialization_with_incorrect_type_of_value():
     assert_that(
-        calling(JunitSerializer).with_args(dict()),
-        raises(
-            TypeError,
-            'Expected "CheckResult" but got "dict"')
+        calling(JunitSerializer).with_args({}),
+        raises(TypeError, 'Expected "CheckResult" but got "dict"'),
     )
 
 
@@ -457,10 +445,8 @@ def test_wandb_serializer_initialization():
 
 def test_wandb_serializer_initialization_with_incorrect_type_of_value():
     assert_that(
-        calling(WandbSerializer).with_args(dict()),
-        raises(
-            TypeError,
-            'Expected "CheckResult" but got "dict"')
+        calling(WandbSerializer).with_args({}),
+        raises(TypeError, 'Expected "CheckResult" but got "dict"'),
     )
 
 
@@ -516,10 +502,7 @@ def wandb_output_assertion(
                 entries[f'{check_result.header}/item-{index}-plot'] = instance_of(wandb.Plotly)
             elif callable(it):
                 entries[f'{check_result.header}/item-{index}-figure'] = instance_of(wandb.Image)
-            elif isinstance(it, DisplayMap):
-                # TODO:
-                pass
-            else:
+            elif not isinstance(it, DisplayMap):
                 raise TypeError(f'Unknown display item type {type(it)}')
 
     if with_conditions_table is True:
@@ -537,10 +520,8 @@ def test_widget_serializer_initialization():
 
 def test_widget_serializer_initialization_with_incorrect_type_of_value():
     assert_that(
-        calling(WandbSerializer).with_args(dict()),
-        raises(
-            TypeError,
-            'Expected "CheckResult" but got "dict"')
+        calling(WandbSerializer).with_args({}),
+        raises(TypeError, 'Expected "CheckResult" but got "dict"'),
     )
 
 
@@ -664,7 +645,6 @@ def assert_widget_output(
     children_count = 4
     header_section_index = 0
     summary_section_index = 1
-    conditions_section_index = 2
     display_section_index = 3
 
     if with_conditions_section is False and with_display_section is False:
@@ -708,6 +688,7 @@ def assert_widget_output(
     )
 
     if with_conditions_section is True:
+        conditions_section_index = 2
         assert_that(
             output.children[conditions_section_index],
             instance_of(HTML)

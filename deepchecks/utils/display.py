@@ -33,8 +33,7 @@ def display_in_gui(result):
         required = {'pyqt5', 'pyqtwebengine'}
         # List of all packages installed (key is always in all small case!)
         installed = {pkg.key for pkg in list(pkg_resources.working_set)}
-        missing = required - installed
-        if missing:
+        if missing := required - installed:
             get_logger().warning('Missing packages in order to display result in GUI. either run "pip install %s"'
                                  ' or use "result.save_as_html()" to save result', {' '.join(missing)})
             return

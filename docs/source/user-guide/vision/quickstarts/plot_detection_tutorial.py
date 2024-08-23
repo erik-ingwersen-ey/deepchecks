@@ -297,7 +297,7 @@ class TomatoData(DetectionData):
         """
         nm_thrs = 0.2
         score_thrs = 0.7
-        imgs = list(img.to(device) for img in batch[0])
+        imgs = [img.to(device) for img in batch[0]]
         # Getting the predictions of the model on the batch
         with torch.no_grad():
             preds = model(imgs)

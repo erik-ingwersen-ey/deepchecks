@@ -80,7 +80,7 @@ class SuiteResultSerializer(HtmlSerializer['suite.SuiteResult']):
         -------
         str
         """
-        if full_html is True:
+        if full_html:
             include_plotlyjs = True
             include_requirejs = True
             connected = False
@@ -124,14 +124,12 @@ class SuiteResultSerializer(HtmlSerializer['suite.SuiteResult']):
             )
             sections.append(f'<br>{link}')
 
-        plotlyjs = plotlyjs_script(connected) if include_plotlyjs is True else ''
-        requirejs = requirejs_script(connected) if include_requirejs is True else ''
+        plotlyjs = plotlyjs_script(connected) if include_plotlyjs else ''
+        requirejs = requirejs_script(connected) if include_requirejs else ''
 
-        if full_html is False:
-            return ''.join([requirejs, plotlyjs, *sections])
-
-        # TODO: use some style to make it pretty
-        return textwrap.dedent(f"""
+        return (
+            textwrap.dedent(
+                f"""
             <html>
             <head><meta charset="utf-8"/></head>
             <body style="background-color: white; padding: 1rem 1rem 0 1rem;">
@@ -140,16 +138,17 @@ class SuiteResultSerializer(HtmlSerializer['suite.SuiteResult']):
                 {''.join(sections)}
             </body>
             </html>
-        """)
+        """
+            )
+            if full_html
+            else ''.join([requirejs, plotlyjs, *sections])
+        )
 
     def prepare_prologue(self) -> str:
         """Prepare prologue section."""
         long_prologue_version = 'The suite is composed of various checks such as: {names}, etc...'
         short_prologue_version = 'The suite is composed of the following checks: {names}.'
-        check_names = list(set(
-            it.check.name()
-            for it in self.value.results
-        ))
+        check_names = list({it.check.name() for it in self.value.results})
         return (
             long_prologue_version.format(names=', '.join(check_names[:3]))
             if len(check_names) > 3

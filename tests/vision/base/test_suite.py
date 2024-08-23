@@ -111,6 +111,8 @@ def test_suite_execution_with_exception_on_compute():
     coco_dataset = coco.load_dataset(object_type='VisionData')
     executions = defaultdict(int)
 
+
+
     class DummyCheck(SingleDatasetCheck):
         def initialize_run(self, context, dataset_kind: DatasetKind):
             executions["initialize_run"] += 1
@@ -121,7 +123,7 @@ def test_suite_execution_with_exception_on_compute():
         def compute(self, context, dataset_kind: DatasetKind) -> CheckResult:
             executions["compute"] += 1
             raise DeepchecksValueError('bad compute')
-            return CheckResult(None)
+
 
     class DummyTrainTestCheck(TrainTestCheck):
         def initialize_run(self, context):

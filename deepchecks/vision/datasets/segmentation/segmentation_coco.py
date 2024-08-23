@@ -193,26 +193,28 @@ class CocoSegmentationDataset(VisionDataset):
                 relevant_labels = [class_id for class_id in relevant_labels if int(class_id) in
                                    COCO_TO_PASCAL_VOC]
 
-                if len(relevant_labels) > 0:
+                if relevant_labels:
                     images.append(all_images[i])
                     labels.append(label)
 
         assert len(images) != 0, 'Did not find folder with images or it was empty'
-        assert not all(l is None for l in labels), 'Did not find folder with labels or it was empty'
+        assert any(
+            l is not None for l in labels
+        ), 'Did not find folder with labels or it was empty'
 
-        train_len = int(self.TRAIN_FRACTION * len(images))
-
-        if test_mode is True:
-            if self.train is True:
-                self.images = images[0:5] * 2
-                self.labels = labels[0:5] * 2
+        if test_mode:
+            if self.train:
+                self.images = images[:5] * 2
+                self.labels = labels[:5] * 2
             else:
                 self.images = images[1:6] * 2
                 self.labels = labels[1:6] * 2
         else:
-            if self.train is True:
-                self.images = images[0:train_len]
-                self.labels = labels[0:train_len]
+            train_len = int(self.TRAIN_FRACTION * len(images))
+
+            if self.train:
+                self.images = images[:train_len]
+                self.labels = labels[:train_len]
             else:
                 self.images = images[train_len:]
                 self.labels = labels[train_len:]

@@ -104,8 +104,7 @@ class Batch:
         dataset = self._context.get_data_by_kind(self._dataset_kind)
         indexes = list(dataset.data_loader.batch_sampler)[self.batch_index]
         index_to_prop = {index: props[index] for index in indexes}
-        props_to_cache = static_prop_to_cache_format(index_to_prop)
-        return props_to_cache
+        return static_prop_to_cache_format(index_to_prop)
 
     def _get_cropped_images(self):
         imgs = []
@@ -140,12 +139,13 @@ class Batch:
             else:
                 data = self._get_relevant_data_for_properties(input_type)
                 self._vision_properties_cache[input_type] = calc_vision_properties(data, properties_list)
-        else:
-            properties_to_calc = [p for p in properties_list if p['name'] not in
-                                  self._vision_properties_cache[input_type].keys()]
-            if len(properties_to_calc) > 0:
-                data = self._get_relevant_data_for_properties(input_type)
-                self._vision_properties_cache[input_type].update(calc_vision_properties(data, properties_to_calc))
+        elif properties_to_calc := [
+            p
+            for p in properties_list
+            if p['name'] not in self._vision_properties_cache[input_type].keys()
+        ]:
+            data = self._get_relevant_data_for_properties(input_type)
+            self._vision_properties_cache[input_type].update(calc_vision_properties(data, properties_to_calc))
         return self._vision_properties_cache[input_type]
 
 

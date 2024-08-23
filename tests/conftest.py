@@ -79,13 +79,9 @@ def validate_suite_result(
         instance_of(CheckResult),
     )))
 
-    failures = [
-        it.exception
-        for it in result.results
-        if isinstance(it, CheckFailure)
-    ]
-
-    if len(failures) != 0:
+    if failures := [
+        it.exception for it in result.results if isinstance(it, CheckFailure)
+    ]:
         assert_that(failures, matcher=exception_matcher)  # type: ignore
 
     for check_result in result.results:
@@ -157,9 +153,8 @@ def _get_wierd_dataset_and_model(is_classification, seed=42):
         data = data.copy()
 
         def _len_or_val(x):
-            if isinstance(x, str):
-                return len(x)
-            return x
+            return len(x) if isinstance(x, str) else x
+
         data['weird_feature'] = data['weird_feature'].apply(_len_or_val)
         return data
 
@@ -172,6 +167,7 @@ def _get_wierd_dataset_and_model(is_classification, seed=42):
         data = data.copy()
         data = data.fillna(0)
         return data
+
     index_col = shuffle(list(range(500)) + [str(i) for i in range(500)], random_state=42)
     df = pd.DataFrame(
         {
@@ -218,7 +214,7 @@ def wierd_classification_dataset_and_model():
 def missing_test_classes_binary_dataset_and_model():
     """A big randomized value dataset for binary."""
     train_ds, test_ds, clf = _get_wierd_dataset_and_model(is_classification=True)
-    test_ds.data[test_ds.label_name] = test_ds.data[test_ds.label_name].apply(lambda x: x % 2)
+    test_ds.data[test_ds.label_name] = test_ds.data[test_ds.label_name] % 2
     return train_ds, test_ds, clf
 
 
@@ -230,8 +226,7 @@ def wierd_regression_dataset_and_model():
 
 @pytest.fixture(scope='session')
 def diabetes_df():
-    diabetes = load_diabetes(return_X_y=False, as_frame=True).frame
-    return diabetes
+    return load_diabetes(return_X_y=False, as_frame=True).frame
 
 
 @pytest.fixture(scope='session')
@@ -305,8 +300,7 @@ def diabetes_split_dataset_and_model_cat(diabetes):
 @pytest.fixture(scope='session')
 def iris_clean():
     """Return Iris dataset as DataFrame."""
-    iris = load_iris(return_X_y=False, as_frame=True)
-    return iris
+    return load_iris(return_X_y=False, as_frame=True)
 
 
 @pytest.fixture(scope='session')
@@ -370,8 +364,7 @@ def iris_dataset_single_class(iris):
     """Return Iris dataset modified to a binary label as Dataset object."""
     idx = iris.target != 2
     df = iris[idx]
-    dataset = Dataset(df, label='target')
-    return dataset
+    return Dataset(df, label='target')
 
 
 @pytest.fixture(scope='session')
@@ -379,8 +372,7 @@ def iris_dataset_single_class_labeled(iris):
     """Return Iris dataset modified to a binary label as Dataset object."""
     idx = iris.target != 2
     df = iris[idx]
-    dataset = Dataset(df, label='target')
-    return dataset
+    return Dataset(df, label='target')
 
 
 @pytest.fixture(scope='session')
@@ -692,18 +684,29 @@ def simple_custom_plt_check():
 
 @pytest.fixture(scope='session')
 def adult_no_split():
-    ds = adult.load_data(as_train_test=False)
-    return ds
+    return adult.load_data(as_train_test=False)
 
 
 @pytest.fixture(scope='session')
 def df_with_mixed_datatypes_and_missing_values():
-    df = pd.DataFrame({
-        'cat': [1, 2, 3, 4, 5], 'dog': [0, 9, 8, np.NAN, 7], 'owl': [np.NAN, 6, 5, 4, 3],
-        'red': [np.NAN, np.NAN, np.NAN, np.NAN, np.NAN], 'blue': [0, 1, 2, 3, 4], 'green': [0, 0, 0, 0, 0],
-        'white': [0.2, 0.5, 0.6, 0.2, -0.1], 'black': [0.1, 0.2, 0.3, 0.4, 0.5],
-        'date': [np.datetime64('2019-01-01'), np.datetime64('2019-12-02'), np.datetime64('2019-01-03'),
-                 np.datetime64('2019-02-04'), np.datetime64('2019-01-05')],
-        'target': [0, 1, 0, 1, 0]
-    }, index=['a', 'b', 'c', 'd', 'e'])
-    return df
+    return pd.DataFrame(
+        {
+            'cat': [1, 2, 3, 4, 5],
+            'dog': [0, 9, 8, np.NAN, 7],
+            'owl': [np.NAN, 6, 5, 4, 3],
+            'red': [np.NAN, np.NAN, np.NAN, np.NAN, np.NAN],
+            'blue': [0, 1, 2, 3, 4],
+            'green': [0, 0, 0, 0, 0],
+            'white': [0.2, 0.5, 0.6, 0.2, -0.1],
+            'black': [0.1, 0.2, 0.3, 0.4, 0.5],
+            'date': [
+                np.datetime64('2019-01-01'),
+                np.datetime64('2019-12-02'),
+                np.datetime64('2019-01-03'),
+                np.datetime64('2019-02-04'),
+                np.datetime64('2019-01-05'),
+            ],
+            'target': [0, 1, 0, 1, 0],
+        },
+        index=['a', 'b', 'c', 'd', 'e'],
+    )

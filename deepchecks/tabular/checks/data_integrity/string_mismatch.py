@@ -139,13 +139,13 @@ class StringMismatch(SingleDatasetCheck):
             for col, baseforms in result.items():
                 variants_percent_sum = 0
                 for variants_list in baseforms.values():
-                    variants_percent_sum += sum([v['percent'] for v in variants_list])
+                    variants_percent_sum += sum(v['percent'] for v in variants_list)
                 if variants_percent_sum > max_ratio:
                     not_passing_columns[col] = format_percent(variants_percent_sum)
 
             if not_passing_columns:
                 details = f'Found {len(not_passing_columns)} out of {len(result)} relevant columns with variants ' \
-                          f'ratio above threshold: {not_passing_columns}'
+                              f'ratio above threshold: {not_passing_columns}'
                 return ConditionResult(ConditionCategory.FAIL, details)
             return ConditionResult(ConditionCategory.PASS, get_condition_passed_message(result))
 
@@ -157,9 +157,11 @@ def _condition_variants_number(result, num_max_variants: int, max_cols_to_show: 
     not_passing_variants = defaultdict(list)
     for col, baseforms in result.items():
         for base_form, variants_list in baseforms.items():
-            if len(variants_list) > num_max_variants:
-                if len(not_passing_variants[col]) < max_forms_to_show:
-                    not_passing_variants[col].append(base_form)
+            if (
+                len(variants_list) > num_max_variants
+                and len(not_passing_variants[col]) < max_forms_to_show
+            ):
+                not_passing_variants[col].append(base_form)
     if not_passing_variants:
         variants_to_show = dict(itertools.islice(not_passing_variants.items(), max_cols_to_show))
         details = f'Found {len(not_passing_variants)} out of {len(result)} columns with amount of variants above ' \

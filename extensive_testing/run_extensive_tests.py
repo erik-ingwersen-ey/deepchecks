@@ -25,12 +25,9 @@ from deepchecks.suites import OverallSuite
 
 
 def has_errors(d):
-    if isinstance(d, dict):
-        if len(d) == 0:
-            return False
-        return any(has_errors(v) for v in d.values())
-    else:
+    if not isinstance(d, dict):
         return True
+    return False if len(d) == 0 else any(has_errors(v) for v in d.values())
 
 
 if __name__ == "__main__":

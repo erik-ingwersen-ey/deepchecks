@@ -85,7 +85,7 @@ class ImageDatasetDrift(TrainTestCheck):
             **kwargs
     ):
         super().__init__(**kwargs)
-        self.image_properties = image_properties if image_properties else default_image_properties
+        self.image_properties = image_properties or default_image_properties
 
         self.n_top_properties = n_top_properties
         self.min_feature_importance = min_feature_importance
@@ -129,13 +129,6 @@ class ImageDatasetDrift(TrainTestCheck):
 
         sample_size = min(df_train.shape[0], df_test.shape[0])
 
-        headnote = """
-        <span>
-        The shown features are the image properties (brightness, aspect ratio, etc.) that are most important for the
-        domain classifier - the domain_classifier trained to distinguish between the train and test datasets.<br>
-        </span>
-        """
-
         numeric_features = []
         categorical_features = []
         for prop in self.image_properties:
@@ -158,6 +151,13 @@ class ImageDatasetDrift(TrainTestCheck):
         )
 
         if displays:
+            headnote = """
+        <span>
+        The shown features are the image properties (brightness, aspect ratio, etc.) that are most important for the
+        domain classifier - the domain_classifier trained to distinguish between the train and test datasets.<br>
+        </span>
+        """
+
             displays.insert(0, headnote)
 
         return CheckResult(value=values_dict, display=displays, header='Image Dataset Drift')

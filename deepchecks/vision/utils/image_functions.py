@@ -69,25 +69,24 @@ def ensure_image(
     `PIL.Image.Image`
     """
     if isinstance(image, pilimage.Image):
-        return image.copy() if copy is True else image
+        return image.copy() if copy else image
     if isinstance(image, torch.Tensor):
         image = t.cast(np.ndarray, image.numpy())
-    if isinstance(image, np.ndarray):
-        image = image.squeeze().astype(np.uint8)
-        if image.ndim == 3:
-            return pilimage.fromarray(image)
-        elif image.ndim == 2:
-            return pilops.colorize(
-                pilimage.fromarray(image),
-                black='black',
-                white='white',
-                blackpoint=image.min(),
-                whitepoint=image.max(),
-            )
-        else:
-            raise ValueError(f'Do not know how to work with {image.ndim} dimensional images')
-    else:
+    if not isinstance(image, np.ndarray):
         raise TypeError(f'cannot convert {type(image)} to the PIL.Image.Image')
+    image = image.squeeze().astype(np.uint8)
+    if image.ndim == 3:
+        return pilimage.fromarray(image)
+    elif image.ndim == 2:
+        return pilops.colorize(
+            pilimage.fromarray(image),
+            black='black',
+            white='white',
+            blackpoint=image.min(),
+            whitepoint=image.max(),
+        )
+    else:
+        raise ValueError(f'Do not know how to work with {image.ndim} dimensional images')
 
 
 def draw_bboxes(

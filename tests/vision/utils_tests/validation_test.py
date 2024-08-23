@@ -33,7 +33,7 @@ def test_mnist_validation_no_save(mnist_dataset_train, mock_trained_mnist):
 def test_mnist_validation_new_loc_save(mnist_dataset_train, mock_trained_mnist):
     if is_headless():
         validate_extractors(mnist_dataset_train, mock_trained_mnist, image_save_location='/tmp')
-        assert_that(os.path.exists('/tmp/' + FILE_NAME), False)
+        assert_that(os.path.exists(f'/tmp/{FILE_NAME}'), False)
 
 
 def test_coco_validation(coco_test_visiondata, mock_trained_yolov5_object_detection):

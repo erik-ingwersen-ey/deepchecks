@@ -166,10 +166,9 @@ def _calculate_feature_importance(
             raise errors.DeepchecksValueError('Cannot calculate permutation feature importance on a pandas Dataframe. '
                                               'In order to force permutation feature importance, please use the Dataset'
                                               ' object.')
-        else:
-            importance = _calc_permutation_importance(model, dataset, model_classes, observed_classes,
-                                                      task_type, **permutation_kwargs)
-            calc_type = 'permutation_importance'
+        importance = _calc_permutation_importance(model, dataset, model_classes, observed_classes,
+                                                  task_type, **permutation_kwargs)
+        calc_type = 'permutation_importance'
 
     # If there was no force permutation, or if it failed while trying to calculate importance,
     # we don't take built-in importance in pipelines because the pipeline is changing the features
@@ -383,9 +382,7 @@ def column_importance_sorter_dict(
         return get_importance(name[0], feature_importances, dataset)
 
     cols_dict = dict(sorted(cols_dict.items(), key=key, reverse=True))
-    if n_top:
-        return dict(list(cols_dict.items())[:n_top])
-    return cols_dict
+    return dict(list(cols_dict.items())[:n_top]) if n_top else cols_dict
 
 
 def column_importance_sorter_df(
@@ -427,6 +424,4 @@ def column_importance_sorter_df(
     if col:
         df = df.sort_values(by=[col], key=key, ascending=False)
     df = df.sort_index(key=key, ascending=False)
-    if n_top:
-        return df.head(n_top)
-    return df
+    return df.head(n_top) if n_top else df

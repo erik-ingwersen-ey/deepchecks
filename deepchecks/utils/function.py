@@ -19,10 +19,11 @@ __all__ = ['run_available_kwargs', 'initvars']
 def run_available_kwargs(func: Callable, **kwargs):
     """Run the passed object only with available kwargs."""
     avail_kwargs = list(signature(func).parameters.keys())
-    pass_kwargs = {}
-    for kwarg_name in avail_kwargs:
-        if kwarg_name in kwargs:
-            pass_kwargs[kwarg_name] = kwargs[kwarg_name]
+    pass_kwargs = {
+        kwarg_name: kwargs[kwarg_name]
+        for kwarg_name in avail_kwargs
+        if kwarg_name in kwargs
+    }
     return func(**pass_kwargs)
 
 
@@ -49,7 +50,7 @@ def initvars(
     signature = extract_signature(obj.__init__)  # pylint: disable=redefined-outer-name
     bind = signature.bind(**state)
 
-    if include_defaults is True:
+    if include_defaults:
         bind.apply_defaults()
         arguments = bind.arguments
     else:

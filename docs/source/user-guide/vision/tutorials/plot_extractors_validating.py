@@ -109,12 +109,8 @@ validate_extractors(CocoDetectionData(data_loader), model)
 
 class CocoDetectionData(DetectionData):
     def infer_on_batch(self, batch, model, device):
-        # Convert from yolo Detections object to List (per image) of Tensors of the shape [B, 6]"""
-        return_list = []
         predictions = model.to(device)(batch[0])
-        for single_image_tensor in predictions.pred:
-            return_list.append(single_image_tensor)
-        return return_list
+        return list(predictions.pred)
 
     # using the same label extractor
     def batch_to_labels(self, batch):
@@ -144,12 +140,8 @@ class CocoDetectionData(DetectionData):
 
     # using the same prediction extractor
     def infer_on_batch(self, batch, model, device):
-        # Convert from yolo Detections object to List (per image) of Tensors of the shape [N, 6]"""
-        return_list = []
         predictions = model.to(device)(batch[0])
-        for single_image_tensor in predictions.pred:
-            return_list.append(single_image_tensor)
-        return return_list
+        return list(predictions.pred)
 
     # using the same label extractor
     def batch_to_labels(self, batch):

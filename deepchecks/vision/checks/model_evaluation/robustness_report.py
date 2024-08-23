@@ -168,9 +168,8 @@ class RobustnessReport(SingleDatasetCheck):
 
             if not failed:
                 return ConditionResult(ConditionCategory.PASS)
-            else:
-                details = f'Augmentations not passing: {set(failed)}'
-                return ConditionResult(ConditionCategory.FAIL, details)
+            details = f'Augmentations not passing: {set(failed)}'
+            return ConditionResult(ConditionCategory.FAIL, details)
 
         return self.add_condition(f'Metrics degrade by not more than {format_percent(ratio)}', condition)
 
@@ -249,7 +248,7 @@ class RobustnessReport(SingleDatasetCheck):
         figures = []
 
         def sort_by_worst_func(aug_data):
-            return sum([m['score'] for m in aug_data[1]['metrics_diff'].values()])
+            return sum(m['score'] for m in aug_data[1]['metrics_diff'].values())
 
         sorted_by_worst = dict(sorted(aug_all_data.items(), key=sort_by_worst_func))
 

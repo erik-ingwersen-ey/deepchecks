@@ -30,7 +30,7 @@ def create_static_predictions(train: VisionData, test: VisionData, model):
             for i, batch in enumerate(vision_data):
                 predictions = vision_data.infer_on_batch(batch, model, device)
                 indexes = list(vision_data.data_loader.batch_sampler)[i]
-                static_pred.update(dict(zip(indexes, predictions)))
+                static_pred |= dict(zip(indexes, predictions))
         else:
             static_pred = None
         static_preds.append(static_pred)
@@ -75,8 +75,7 @@ class BenchmarkVision:
     param_names = ['dataset_name']
 
     def setup_cache(self):
-        cache = {}
-        cache['mnist'] = setup_mnist()
+        cache = {'mnist': setup_mnist()}
         cache['coco'] = setup_coco()
         return cache
 

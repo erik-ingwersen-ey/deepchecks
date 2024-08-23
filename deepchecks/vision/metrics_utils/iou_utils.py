@@ -116,6 +116,4 @@ def per_sample_mean_iou(predictions, labels):
 
 def untorchify(item):
     """If item is torch tensor do `.item()` else return item itself."""
-    if isinstance(item, torch.Tensor):
-        return item.cpu().item()
-    return item
+    return item.cpu().item() if isinstance(item, torch.Tensor) else item

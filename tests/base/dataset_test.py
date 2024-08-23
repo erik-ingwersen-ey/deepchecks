@@ -136,7 +136,7 @@ def test_dataset_empty_features(iris):
     args = {'df': iris,
             'features': []}
     dataset = Dataset(**args)
-    assert_that(dataset.features, equal_to(list([])))
+    assert_that(dataset.features, equal_to([]))
 
 
 def test_dataset_cat_features(diabetes_df):

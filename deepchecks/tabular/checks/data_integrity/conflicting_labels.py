@@ -82,8 +82,7 @@ class ConflictingLabels(SingleDatasetCheck):
 
         # HACK: pandas have bug with groupby on category dtypes, so until it fixed, change dtypes manually
         df = dataset.data.copy()
-        category_columns = df.dtypes[df.dtypes == 'category'].index.tolist()
-        if category_columns:
+        if category_columns := df.dtypes[df.dtypes == 'category'].index.tolist():
             df = df.astype({c: 'object' for c in category_columns})
 
         # Get index in order to use in the display
@@ -119,7 +118,7 @@ class ConflictingLabels(SingleDatasetCheck):
                 display_sample[indices_name] = format_list(group_data[index_col_name])
                 display_samples.append(display_sample)
 
-        if len(display_samples) == 0:
+        if not display_samples:
             display = None
         else:
             display = pd.DataFrame.from_records(display_samples[:self.n_to_show])

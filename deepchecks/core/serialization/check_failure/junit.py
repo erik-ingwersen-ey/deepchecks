@@ -61,9 +61,9 @@ class CheckFailureSerializer(JunitSerializer['check_types.CheckFailure']):
             raise ValueError(f'failure_tag must be one of {FAILURE} or {SKIPPED}')
 
         attributes = {
-            'classname': self.value.check.__class__.__module__ + '.' + self.value.check.__class__.__name__
-            , 'name': self.value.get_header()
-            , 'time': str(self.value.run_time)
+            'classname': f'{self.value.check.__class__.__module__}.{self.value.check.__class__.__name__}',
+            'name': self.value.get_header(),
+            'time': str(self.value.run_time),
         }
 
         root = ET.Element('testcase', attrib=attributes)

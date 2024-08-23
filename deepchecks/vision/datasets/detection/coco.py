@@ -216,17 +216,17 @@ class CocoDataset(VisionDataset):
             labels.append(label if label.exists() else None)
 
         assert \
-            len(images) != 0, \
-            'Did not find folder with images or it was empty'
-        assert \
-            not all(l is None for l in labels), \
-            'Did not find folder with labels or it was empty'
+                len(images) != 0, \
+                'Did not find folder with images or it was empty'
+        assert any(
+            l is not None for l in labels
+        ), 'Did not find folder with labels or it was empty'
 
         train_len = int(self.TRAIN_FRACTION * len(images))
 
-        if self.train is True:
-            self.images = images[0:train_len]
-            self.labels = labels[0:train_len]
+        if self.train:
+            self.images = images[:train_len]
+            self.labels = labels[:train_len]
         else:
             self.images = images[train_len:]
             self.labels = labels[train_len:]
@@ -314,11 +314,8 @@ def download_coco128_from_ultralytics(path: Path):
         )
 
     # Removing the README.txt file if it exists since it causes issues with sphinx-gallery
-    try:
+    with contextlib.suppress(FileNotFoundError):
         os.remove(str(coco_dir / 'README.txt'))
-    except FileNotFoundError:
-        pass
-
     return coco_dir, 'train2017'
 
 

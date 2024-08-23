@@ -173,11 +173,11 @@ class SimpleModelComparison(TrainTestCheck):
         ]
         classes_display_array = []
         display_array = []
+        # Dict in format { Scorer : Dict { Class : Dict { Origin/Simple : score } } }
+        results_dict = {}
         # Multiclass have different return type from the scorer, list of score per class instead of single score
         if task_type in [TaskType.MULTICLASS, TaskType.BINARY]:
             class_counts = test_label.groupby(test_label).count()
-            # Dict in format { Scorer : Dict { Class : Dict { Origin/Simple : score } } }
-            results_dict = {}
             for scorer in scorers:
                 model_dict = defaultdict(dict)
                 for model_name, model_type, model_instance in models:
@@ -208,8 +208,6 @@ class SimpleModelComparison(TrainTestCheck):
                                                               ])
                 results_dict[scorer.name] = model_dict
         else:
-            # Dict in format { Scorer : Dict { Origin/Simple : score } }
-            results_dict = {}
             for scorer in scorers:
                 model_dict = defaultdict(dict)
                 for model_name, model_type, model_instance in models:
@@ -377,7 +375,7 @@ class SimpleModelComparison(TrainTestCheck):
         """
         name = f'Model performance gain over simple model is greater than {format_percent(min_allowed_gain)}'
         if classes:
-            name = name + f' for classes {str(classes)}'
+            name = name + f' for classes {classes}'
         return self.add_condition(name,
                                   condition,
                                   include_classes=classes,
@@ -386,17 +384,16 @@ class SimpleModelComparison(TrainTestCheck):
                                   average=average)
 
 
-def condition(result: Dict, include_classes=None, average=False, max_gain=None, min_allowed_gain=None) -> \
-        ConditionResult:
+def condition(result: Dict, include_classes=None, average=False, max_gain=None, min_allowed_gain=None) -> ConditionResult:
     scores = result['scores']
     task_type = result['type']
     scorers_perfect = result['scorers_perfect']
 
     passed_condition = True
+    passed_metrics = {}
+    perfect_metrics = []
     if task_type in [TaskType.MULTICLASS, TaskType.BINARY] and not average:
-        passed_metrics = {}
         failed_classes = defaultdict(dict)
-        perfect_metrics = []
         for metric, classes_scores in scores.items():
             gains = {}
             metric_passed = True
@@ -421,7 +418,7 @@ def condition(result: Dict, include_classes=None, average=False, max_gain=None, 
             if metric_passed and gains:
                 avg_gain = sum(gains.values()) / len(gains)
                 passed_metrics[metric] = format_percent(avg_gain)
-            elif metric_passed and not gains:
+            elif metric_passed:
                 perfect_metrics.append(metric)
 
         if failed_classes:
@@ -432,9 +429,7 @@ def condition(result: Dict, include_classes=None, average=False, max_gain=None, 
         else:
             msg = f'Found metrics with perfect score, no gain is calculated: {perfect_metrics}'
     else:
-        passed_metrics = {}
         failed_metrics = {}
-        perfect_metrics = []
         if task_type in [TaskType.MULTICLASS, TaskType.BINARY]:
             scores = average_scores(scores, include_classes)
         for metric, models_scores in scores.items():

@@ -32,10 +32,7 @@ def get_modification_func_classification(new_labels):
 def get_modification_func_classification_switch_single_label():
     def add_new_test_labels(orig_dataset, idx):
         data, label = orig_dataset[idx]
-        if label == 3:
-            return data, -3
-        else:
-            return orig_dataset[idx]
+        return (data, -3) if label == 3 else orig_dataset[idx]
 
     return add_new_test_labels
 

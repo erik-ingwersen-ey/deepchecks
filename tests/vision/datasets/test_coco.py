@@ -68,8 +68,8 @@ def test_train_test_split():
 
     assert_that((len(train.dataset) + len(test.dataset)) == 128)
 
-    train_images = set(it.name for it in train.dataset.images)
-    test_images = set(it.name for it in test.dataset.images)
+    train_images = {it.name for it in train.dataset.images}
+    test_images = {it.name for it in test.dataset.images}
 
     intersection = train_images.intersection(test_images)
-    assert_that(len(intersection) == 0)
+    assert_that(not intersection)

@@ -54,7 +54,7 @@ def validate_dir(checks_path, examples_path):
                 check_path = os.path.join(root, file_name)
                 if any(inspect.getmodule(cls).__file__.endswith(check_path) for cls in ignored_classes):
                     continue
-                example_file_name = "plot_" + file_name
+                example_file_name = f"plot_{file_name}"
                 splitted_path = check_path.split("/")
                 submodule_name = splitted_path[1]
                 check_type = splitted_path[-2]
@@ -62,9 +62,6 @@ def validate_dir(checks_path, examples_path):
                 if not os.path.exists(example_path):
                     print(f"Check {check_path} does not have a corresponding example file")
                     all_valid = False
-                else:
-                    # validate_example(example_path)
-                    pass
     return all_valid
 
 

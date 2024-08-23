@@ -53,8 +53,7 @@ class BenchmarkTabular:
     param_names = ['dataset_name']
 
     def setup_cache(self):
-        cache = {}
-        cache['lending_club'] = setup_lending_club()
+        cache = {'lending_club': setup_lending_club()}
         cache['avocado'] = setup_avocado()
         return cache
 

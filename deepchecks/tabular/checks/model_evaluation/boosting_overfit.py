@@ -116,9 +116,12 @@ class PartialBoostingModel:
         if model_class in ['AdaBoostClassifier', 'GradientBoostingClassifier', 'AdaBoostRegressor',
                            'GradientBoostingRegressor']:
             return len(model.estimators_)
-        elif model_class in ['LGBMClassifier', 'LGBMRegressor']:
-            return model.n_estimators
-        elif model_class in ['XGBClassifier', 'XGBRegressor']:
+        elif model_class in [
+            'LGBMClassifier',
+            'LGBMRegressor',
+            'XGBClassifier',
+            'XGBRegressor',
+        ]:
             return model.n_estimators
         elif model_class in ['CatBoostClassifier', 'CatBoostRegressor']:
             return model.tree_count_

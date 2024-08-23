@@ -22,7 +22,7 @@ __all__ = ['importable_name', 'import_type', 'validate_config']
 
 def importable_name(obj: t.Any) -> t.Tuple[str, str]:
     """Return the full import name of an object type."""
-    kind = type(obj) if not isinstance(obj, type) else obj
+    kind = obj if isinstance(obj, type) else type(obj)
     name = kind.__qualname__
     module = kind.__module__
     return module, name

@@ -159,7 +159,7 @@ class TrainTestPredictionDrift(TrainTestCheck, ReduceMixin):
 
         # Flag for computing drift on the probabilities rather than the predicted labels
         proba_drift = ((context.task_type == TaskType.BINARY) and (self.drift_mode == 'auto')) or \
-                      (self.drift_mode == 'proba')
+                          (self.drift_mode == 'proba')
 
         if proba_drift:
             train_prediction = np.array(model.predict_proba(train_dataset.features_columns))
@@ -175,12 +175,18 @@ class TrainTestPredictionDrift(TrainTestCheck, ReduceMixin):
 
         for class_idx in range(train_prediction.shape[1]):
             class_name = classes[class_idx]
-            drift_score_dict[class_name], method, drift_display_dict[class_name] = calc_drift_and_plot(
+            (
+                drift_score_dict[class_name],
+                method,
+                drift_display_dict[class_name],
+            ) = calc_drift_and_plot(
                 train_column=pd.Series(train_prediction[:, class_idx].flatten()),
                 test_column=pd.Series(test_prediction[:, class_idx].flatten()),
-                value_name='model predictions' if not proba_drift else
-                f'predicted probabilities for class {class_name}',
-                column_type='categorical' if (context.task_type != TaskType.REGRESSION) and (not proba_drift)
+                value_name=f'predicted probabilities for class {class_name}'
+                if proba_drift
+                else 'model predictions',
+                column_type='categorical'
+                if (context.task_type != TaskType.REGRESSION) and (not proba_drift)
                 else 'numerical',
                 margin_quantile_filter=self.margin_quantile_filter,
                 max_num_categories_for_drift=self.max_num_categories_for_drift,

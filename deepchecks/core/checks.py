@@ -178,7 +178,7 @@ class BaseCheck(abc.ABC):
             module_name=module_name,
             params=params,
         )
-        if include_version is True:
+        if include_version:
             conf['version'] = __version__
         return conf
 
@@ -248,8 +248,7 @@ class BaseCheck(abc.ABC):
 
         """
         tab_chr = '\t'
-        params = self.params()
-        if params:
+        if params := self.params():
             params_str = ', '.join([f'{k}={v}' for k, v in params.items()])
             params_str = f'({params_str})'
         else:

@@ -113,7 +113,11 @@ class SimpleModelComparison(TrainTestCheck):
                                            f'["largest", "smallest", "random", "best", "worst"]')
 
             self.show_only = show_only
-            if alternative_metrics is not None and show_only in ['best', 'worst'] and metric_to_show_by is None:
+            if (
+                alternative_metrics is not None
+                and show_only in {'best', 'worst'}
+                and metric_to_show_by is None
+            ):
                 raise DeepchecksValueError('When alternative_metrics are provided and show_only is one of: '
                                            '["best", "worst"], metric_to_show_by must be specified.')
 
@@ -243,9 +247,7 @@ class SimpleModelComparison(TrainTestCheck):
         labels = []
         for label, count in test.n_of_samples_per_class.items():
             labels += [label] * count
-            for _ in range(count):
-                dummy_predictions.append(dummy_predictor())
-
+            dummy_predictions.extend(dummy_predictor() for _ in range(count))
         # Get scorers
         if self.alternative_metrics is None:
             metrics = {'F1': Fbeta(beta=1, average=False)}
@@ -277,7 +279,7 @@ class SimpleModelComparison(TrainTestCheck):
         """
         name = f'Model performance gain over simple model is greater than {format_percent(min_allowed_gain)}'
         if classes:
-            name = name + f' for classes {str(classes)}'
+            name = name + f' for classes {classes}'
         return self.add_condition(name,
                                   calculate_condition_logic,
                                   include_classes=classes,

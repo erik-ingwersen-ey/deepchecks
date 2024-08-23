@@ -71,7 +71,7 @@ class AveragePrecisionRecall(Metric, MetricMixin):
         self.iou_thresholds = np.linspace(*iou_range, endpoint=True)
         self.max_detections_per_class = max_dets
         self.area_range = area_range
-        if average in ['none', 'macro', 'weighted']:
+        if average in {'none', 'macro', 'weighted'}:
             self.average = average
         else:
             raise DeepchecksValueError('average should be one of: \'none\', \'macro\', \'weighted\'')
@@ -179,7 +179,7 @@ class AveragePrecisionRecall(Metric, MetricMixin):
         bb_info = self.group_class_detection_label(detected, ground_truth)
         ious = {k: self.calc_pairwise_ious(v['detected'], v['ground_truth']) for k, v in bb_info.items()}
 
-        for class_id in ious.keys():
+        for class_id in ious:
             image_evals = self._evaluate_image(
                 bb_info[class_id]['detected'],
                 bb_info[class_id]['ground_truth'],
@@ -304,9 +304,7 @@ class AveragePrecisionRecall(Metric, MetricMixin):
             return not area_bb < self.area_range[0]
         if area_size == 'medium':
             return not self.area_range[0] <= area_bb <= self.area_range[1]
-        if area_size == 'large':
-            return not area_bb > self.area_range[1]
-        return False
+        return not area_bb > self.area_range[1] if area_size == 'large' else False
 
     def filter_res(self, res: np.ndarray, iou: float = None, area: str = None, max_dets: int = None):
         """Get the value of a result by the filtering values.
@@ -378,8 +376,7 @@ class AveragePrecisionRecall(Metric, MetricMixin):
                     class_weights.fill(1 / num_classes)
                 if len(class_weights) != num_classes:
                     raise DeepchecksValueError('The class weights shape must match the number of classes')
-                weighted_result = np.dot(filtered_res, class_weights)
-                return weighted_result
+                return np.dot(filtered_res, class_weights)
             if zeroed_negative:
                 res = res.clip(min=0)
             return res[0][0]

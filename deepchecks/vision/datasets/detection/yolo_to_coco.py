@@ -65,8 +65,7 @@ class YoloParser:
         """
         labels = []
         with open(full_label_path, "r", encoding="utf8") as fid:
-            for line in fid:
-                labels.append(list(map(float, line.split(" "))))
+            labels.extend(list(map(float, line.split(" "))) for line in fid)
         return np.array(labels)
 
     def parse_images_and_labels(self, images_path: str, labels_path: str):
@@ -82,7 +81,7 @@ class YoloParser:
         """
         for img_path in [f for f in os.listdir(images_path) if f[-3:].lower() in ["jpg", "jpeg", "png"]]:
             full_img_path = osp.join(images_path, img_path)
-            full_label_path = osp.join(labels_path, osp.splitext(img_path)[0] + ".txt")
+            full_label_path = osp.join(labels_path, f"{osp.splitext(img_path)[0]}.txt")
             assert osp.isfile(full_label_path), f"No matching label for image {full_img_path}!"
             h, w, _ = cv2.imread(full_img_path).shape
             labels = self.parse_label_file(full_label_path)
@@ -145,17 +144,19 @@ class YoloParser:
         output_path : str
             Path to the output JSON file.
         """
-        coco_json = {}
-        coco_json["info"] = {
-            "description": "COCO Dataset From Script",
-            "url": "http://cocodataset.org",
-            "version": "1.0",
-            "year": datetime.datetime.now().date().year,
-            "contributor": "@nirbenz",
-            "date_created": datetime.datetime.now().date().strftime("%Y/%m/%d")
+        coco_json = {
+            "info": {
+                "description": "COCO Dataset From Script",
+                "url": "http://cocodataset.org",
+                "version": "1.0",
+                "year": datetime.datetime.now().date().year,
+                "contributor": "@nirbenz",
+                "date_created": datetime.datetime.now()
+                .date()
+                .strftime("%Y/%m/%d"),
+            },
+            "licenses": "#TODO",
         }
-        # TODO license
-        coco_json["licenses"] = "#TODO"
         coco_json["images"] = self._images
         coco_json["annotations"] = self._annotations
         if isinstance(self._categories, dict):

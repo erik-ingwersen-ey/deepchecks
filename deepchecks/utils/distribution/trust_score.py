@@ -94,8 +94,7 @@ class TrustScore:
         elif self.dist_filter_type == 'mean':
             knn_r = np.mean(knn_r[:, 1:], axis=1)  # exclude distance of instance to itself
         cutoff_r = np.percentile(knn_r, (1 - self.alpha) * 100)  # cutoff distance
-        X_keep = X[np.where(knn_r <= cutoff_r)[0], :]  # define instances to keep
-        return X_keep
+        return X[np.where(knn_r <= cutoff_r)[0], :]
 
     def filter_by_probability_knn(self, X: np.ndarray, Y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Filter out instances with high label disagreement amongst its k nearest neighbors.
@@ -166,15 +165,11 @@ class TrustScore:
                 raise Exception('self.filter must be one of ["distance_knn", "probability_knn", None]')
 
             no_x_fit = len(X_fit) == 0
-            if no_x_fit or len(X[np.where(Y == c)[0]]) == 0:
-                if no_x_fit and len(X[np.where(Y == c)[0]]) == 0:
+            if no_x_fit:
+                if len(X[np.where(Y == c)[0]]) == 0:
                     get_logger().warning('No instances available for class %s', c)
-                elif no_x_fit:
+                else:
                     get_logger().warning('Filtered all the instances for class %s. Lower alpha or check data.', c)
-            else:
-                self.kdtrees[c] = KDTree(X_fit, leaf_size=self.leaf_size,
-                                         metric=self.metric)  # build KDTree for class c
-                self.X_kdtree[c] = X_fit
 
     def score(self, X: np.ndarray, Y: np.ndarray, k: int = 2, dist_type: str = 'point') \
             -> Tuple[np.ndarray, np.ndarray]:
@@ -235,14 +230,10 @@ class TrustScore:
         filter_center_size = 40.  # % of data
 
         baseline_confidence = baseline_scores
-        if test_scores is None:
-            test_confidence = baseline_scores
-        else:
-            test_confidence = test_scores
-
+        test_confidence = baseline_scores if test_scores is None else test_scores
         center_size = max(np.nanpercentile(baseline_confidence, 50 + filter_center_size / 2),
                           np.nanpercentile(test_confidence, 50 + filter_center_size / 2)) - \
-            min(np.nanpercentile(baseline_confidence, 50 - filter_center_size / 2),
+                min(np.nanpercentile(baseline_confidence, 50 - filter_center_size / 2),
                 np.nanpercentile(test_confidence, 50 - filter_center_size / 2))
         max_median = max(np.nanmedian(baseline_confidence), np.nanmedian(test_confidence))
         min_median = min(np.nanmedian(baseline_confidence), np.nanmedian(test_confidence))

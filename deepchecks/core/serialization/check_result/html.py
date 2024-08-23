@@ -88,7 +88,7 @@ class CheckResultSerializer(HtmlSerializer['check_types.CheckResult']):
         -------
         str
         """
-        if full_html is True:
+        if full_html:
             include_plotlyjs = True
             include_requirejs = True
             connected = False
@@ -108,21 +108,23 @@ class CheckResultSerializer(HtmlSerializer['check_types.CheckResult']):
                 is_for_iframe_with_srcdoc=is_for_iframe_with_srcdoc
             )))
 
-        plotlyjs = plotlyjs_script(connected) if include_plotlyjs is True else ''
-        requirejs = requirejs_script(connected) if include_requirejs is True else ''
+        plotlyjs = plotlyjs_script(connected) if include_plotlyjs else ''
+        requirejs = requirejs_script(connected) if include_requirejs else ''
 
-        if full_html is False:
-            return ''.join([requirejs, plotlyjs, *sections])
-
-        # TODO: use some style to make it pretty
-        return textwrap.dedent(f"""
+        return (
+            textwrap.dedent(
+                f"""
             <html>
             <head><meta charset="utf-8"/></head>
             <body style="background-color: white;">
                 {''.join([requirejs, plotlyjs, *sections])}
             </body>
             </html>
-        """)
+        """
+            )
+            if full_html
+            else ''.join([requirejs, plotlyjs, *sections])
+        )
 
     def prepare_header(self, output_id: t.Optional[str] = None) -> str:
         """Prepare the header section of the html output."""
@@ -309,7 +311,7 @@ class DisplayItemsHandler(ABCDisplayItemsHandler):
         **kwargs
     ) -> str:
         """Handle plotly figure item."""
-        if plotly_to_image is True:
+        if plotly_to_image:
             img = item.to_image(format='jpeg', engine='auto')
             return imagetag(img)
 

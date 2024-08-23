@@ -33,15 +33,15 @@ def numpy_shape_dataloader(shape: tuple = None, value: Union[float, np.ndarray] 
     if collate_fn is None:
         collate_fn = np.stack
 
+
+
     class TwoTupleDataset(Dataset):
         def __getitem__(self, index):
-            if isinstance(value, (float, int)):
-                return np.ones(shape) * value
-            else:
-                return value
+            return np.ones(shape) * value if isinstance(value, (float, int)) else value
 
         def __len__(self) -> int:
             return 8
+
 
     return DataLoader(TwoTupleDataset(), batch_size=4, collate_fn=collate_fn)
 

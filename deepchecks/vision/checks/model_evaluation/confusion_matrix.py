@@ -26,17 +26,14 @@ from deepchecks.vision.vision_data import TaskType
 __all__ = ['ConfusionMatrixReport']
 
 
-def filter_confusion_matrix(confusion_matrix: pd.DataFrame, number_of_categories: int) -> \
-                            t.Tuple[np.ndarray, int]:
+def filter_confusion_matrix(confusion_matrix: pd.DataFrame, number_of_categories: int) -> t.Tuple[np.ndarray, int]:
     pq = PriorityQueue()
     for row, values in enumerate(confusion_matrix):
         for col, value in enumerate(values):
             if row != col:
                 pq.put((-value, (row, col)))
     categories = set()
-    while not pq.empty():
-        if len(categories) >= number_of_categories:
-            break
+    while not pq.empty() and len(categories) < number_of_categories:
         _, (row, col) = pq.get()
         categories.add(row)
         categories.add(col)
@@ -175,7 +172,7 @@ class ConfusionMatrixReport(SingleDatasetCheck):
                 if detection[4] > self.confidence_threshold
             ]
 
-            if len(detections_passed_threshold) == 0:
+            if not detections_passed_threshold:
                 # detections are empty, update matrix for labels
                 for label in image_labels:
                     label_class = int(label[0].item())

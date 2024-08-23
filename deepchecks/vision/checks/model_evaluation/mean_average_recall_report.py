@@ -56,19 +56,29 @@ class MeanAverageRecallReport(SingleDatasetCheck):
         small_area = int(math.sqrt(self._area_range[0]))
         large_area = int(math.sqrt(self._area_range[1]))
         res = self._ap_metric.compute()[0]['recall']
-        rows = []
-        for title, area_name in zip(['All',
-                                     f'Small (area < {small_area}^2)',
-                                     f'Medium ({small_area}^2 < area < {large_area}^2)',
-                                     f'Large (area < {large_area}^2)'],
-                                    ['all', 'small', 'medium', 'large']):
-            rows.append([
+        rows = [
+            [
                 title,
-                self._ap_metric.get_classes_scores_at(res, area=area_name, max_dets=1),
-                self._ap_metric.get_classes_scores_at(res, area=area_name, max_dets=10),
-                self._ap_metric.get_classes_scores_at(res, area=area_name, max_dets=100)
-            ])
-
+                self._ap_metric.get_classes_scores_at(
+                    res, area=area_name, max_dets=1
+                ),
+                self._ap_metric.get_classes_scores_at(
+                    res, area=area_name, max_dets=10
+                ),
+                self._ap_metric.get_classes_scores_at(
+                    res, area=area_name, max_dets=100
+                ),
+            ]
+            for title, area_name in zip(
+                [
+                    'All',
+                    f'Small (area < {small_area}^2)',
+                    f'Medium ({small_area}^2 < area < {large_area}^2)',
+                    f'Large (area < {large_area}^2)',
+                ],
+                ['all', 'small', 'medium', 'large'],
+            )
+        ]
         results = pd.DataFrame(data=rows, columns=['Area size', 'AR@1 (%)', 'AR@10 (%)', 'AR@100 (%)'])
         results = results.set_index('Area size')
 

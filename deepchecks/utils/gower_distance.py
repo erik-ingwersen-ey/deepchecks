@@ -100,7 +100,11 @@ def calculate_nearest_neighbors_distances(data: pd.DataFrame, cat_cols: List[Has
 
     distances, indexes = np.zeros((num_indices_to_calc, num_neighbors)), np.zeros((num_indices_to_calc, num_neighbors))
     # handle categorical - transform to an ordinal numpy array
-    cat_data = np.asarray(cat_data.apply(lambda x: pd.factorize(x)[0])) if not cat_data.empty else np.asarray(cat_data)
+    cat_data = (
+        np.asarray(cat_data)
+        if cat_data.empty
+        else np.asarray(cat_data.apply(lambda x: pd.factorize(x)[0]))
+    )
     # handle numerical - calculate ranges per feature and fill numerical nan to minus np.inf
     numeric_data = np.asarray(numeric_data.fillna(value=np.nan).astype('float64'))
     numeric_feature_ranges = np.nanmax(numeric_data, axis=0) - np.nanmin(numeric_data, axis=0)
@@ -203,14 +207,9 @@ def calculate_distance(vec1: np.array, vec2: np.array, range_per_feature: np.arr
                 sum_dist += 0
             elif (pd.isnull(vec1[col_index]) or pd.isnull(vec2[col_index])) or vec1[col_index] != vec2[col_index]:
                 sum_dist += 1
-            num_features += 1
+        elif pd.isnull(vec1[col_index]) or pd.isnull(vec2[col_index]):
+            continue
         else:
-            # numeric feature
-            if pd.isnull(vec1[col_index]) or pd.isnull(vec2[col_index]):
-                continue
             sum_dist += np.abs(vec1[col_index] - vec2[col_index]) / range_per_feature[col_index]
-            num_features += 1
-
-    if num_features == 0:
-        return np.nan
-    return sum_dist / num_features
+        num_features += 1
+    return np.nan if num_features == 0 else sum_dist / num_features

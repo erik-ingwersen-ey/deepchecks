@@ -183,8 +183,7 @@ def feature_distribution_traces(
         # The min value of the range (range(min. max)) is bigger because
         # otherwise bars will not be centralized on the plot, they will
         # appear on the left part of the plot (that is probably because of zero)
-        range_max = max_num_categories if len(set(train_column).union(test_column)) > max_num_categories \
-            else len(set(train_column).union(test_column))
+        range_max = min(len(set(train_column).union(test_column)), max_num_categories)
         xaxis_layout = dict(type='category', range=(-3, range_max + 2))
         return traces, xaxis_layout, y_layout
     else:
@@ -271,11 +270,17 @@ def _create_bars_data_for_mixed_kde_plot(counts: np.ndarray, max_kde_value: floa
 
 def _create_distribution_scatter_plot(xs, ys, mean, median, is_train,
                                       dataset_names: Tuple[str] = DEFAULT_DATASET_NAMES) -> List[go.Scatter]:
-    traces = []
     name = dataset_names[0] if is_train else dataset_names[1]
     train_or_test = DEFAULT_DATASET_NAMES[0] if is_train else DEFAULT_DATASET_NAMES[1]
-    traces.append(go.Scatter(x=xs, y=ys, fill='tozeroy', name=f'{name} Dataset',
-                             line=dict(color=colors[train_or_test], shape='spline')))
+    traces = [
+        go.Scatter(
+            x=xs,
+            y=ys,
+            fill='tozeroy',
+            name=f'{name} Dataset',
+            line=dict(color=colors[train_or_test], shape='spline'),
+        )
+    ]
     y_mean_index = np.argmax(xs == mean)
     traces.append(go.Scatter(x=[mean, mean], y=[0, ys[y_mean_index]], name=f'{name} Mean',
                              line=dict(color=colors[train_or_test], dash='dash'), mode='lines+markers'))

@@ -60,8 +60,7 @@ def get_condition_test_performance_greater_than(min_score: float) -> \
     return condition
 
 
-def get_condition_train_test_relative_degradation_less_than(threshold: float) -> \
-        t.Callable[[pd.DataFrame], ConditionResult]:
+def get_condition_train_test_relative_degradation_less_than(threshold: float) -> t.Callable[[pd.DataFrame], ConditionResult]:
     """Add condition - test performance is not degraded by more than given percentage in train.
 
     Parameters
@@ -76,9 +75,7 @@ def get_condition_train_test_relative_degradation_less_than(threshold: float) ->
     """
     def _ratio_of_change_calc(score_1, score_2):
         if score_1 == 0:
-            if score_2 == 0:
-                return 0
-            return threshold + 1
+            return 0 if score_2 == 0 else threshold + 1
         return (score_1 - score_2) / abs(score_1)
 
     def condition(check_result: pd.DataFrame) -> ConditionResult:
@@ -111,7 +108,7 @@ def get_condition_train_test_relative_degradation_less_than(threshold: float) ->
                 train_scores_class = train_scores.loc[train_scores[class_column] == class_name]
                 test_scores_dict = dict(zip(test_scores_class['Metric'], test_scores_class['Value']))
                 train_scores_dict = dict(zip(train_scores_class['Metric'], train_scores_class['Value']))
-                if len(test_scores_dict) == 0 or len(train_scores_dict) == 0:
+                if not test_scores_dict or not train_scores_dict:
                     continue
                 # Calculate percentage of change from train to test
                 diff = {score_name: _ratio_of_change_calc(score, test_scores_dict[score_name])
@@ -121,7 +118,7 @@ def get_condition_train_test_relative_degradation_less_than(threshold: float) ->
         else:
             test_scores_dict = dict(zip(test_scores['Metric'], test_scores['Value']))
             train_scores_dict = dict(zip(train_scores['Metric'], train_scores['Value']))
-            if not (len(test_scores_dict) == 0 or len(train_scores_dict) == 0):
+            if test_scores_dict and train_scores_dict:
                 # Calculate percentage of change from train to test
                 diff = {score_name: _ratio_of_change_calc(score, test_scores_dict[score_name])
                         for score_name, score in train_scores_dict.items()}

@@ -86,12 +86,8 @@ def un_numpy(val):
         returns the numpy value in a native type.
     """
     if isinstance(val, np.generic):
-        if np.isnan(val):
-            return None
-        return val.item()
-    if isinstance(val, np.ndarray):
-        return val.tolist()
-    return val
+        return None if np.isnan(val) else val.item()
+    return val.tolist() if isinstance(val, np.ndarray) else val
 
 
 def validate_columns_exist(
@@ -202,8 +198,7 @@ def generalized_corrwith(x1: pd.DataFrame, x2: pd.DataFrame, method: t.Callable)
     DataFrame
         Pairwise correlations, the index matches the columns of x1 and the columns match the columns of x2.
     """
-    corr_results = x2.apply(lambda col: x1.corrwith(col, method=method))
-    return corr_results
+    return x2.apply(lambda col: x1.corrwith(col, method=method))
 
 
 def is_float_column(col: pd.Series) -> bool:
@@ -219,7 +214,4 @@ def is_float_column(col: pd.Series) -> bool:
     bool
         True if the column is float, False otherwise.
     """
-    if not is_float_dtype(col):
-        return False
-
-    return (col.round() != col).any()
+    return (col.round() != col).any() if is_float_dtype(col) else False

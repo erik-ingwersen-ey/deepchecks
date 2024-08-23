@@ -68,14 +68,10 @@ def theil_u_correlation(x: Union[List, np.ndarray, pd.Series], y: Union[List, np
     s_xy = conditional_entropy(x, y)
     values_probabilities = value_frequency(x)
     s_x = entropy(values_probabilities)
-    if s_x == 0:
-        return 1
-    else:
-        return (s_x - s_xy) / s_x
+    return 1 if s_x == 0 else (s_x - s_xy) / s_x
 
 
-def symmetric_theil_u_correlation(x: Union[List, np.ndarray, pd.Series], y: Union[List, np.ndarray, pd.Series]) -> \
-        float:
+def symmetric_theil_u_correlation(x: Union[List, np.ndarray, pd.Series], y: Union[List, np.ndarray, pd.Series]) -> float:
     """
     Calculate the symmetric Theil's U correlation of y to x.
 
@@ -95,8 +91,7 @@ def symmetric_theil_u_correlation(x: Union[List, np.ndarray, pd.Series], y: Unio
     h_y = entropy(value_frequency(y))
     u_xy = theil_u_correlation(x, y)
     u_yx = theil_u_correlation(y, x)  # pylint: disable=arguments-out-of-order
-    u_sym = (h_x * u_xy + h_y * u_yx) / (h_x + h_y)
-    return u_sym
+    return (h_x * u_xy + h_y * u_yx) / (h_x + h_y)
 
 
 def correlation_ratio(categorical_data: Union[List, np.ndarray, pd.Series],
@@ -135,8 +130,4 @@ def correlation_ratio(categorical_data: Union[List, np.ndarray, pd.Series],
     y_total_avg = np.sum(np.multiply(y_avg_array, n_array)) / np.sum(n_array)
     numerator = np.sum(np.multiply(n_array, np.power(np.subtract(y_avg_array, y_total_avg), 2)))
     denominator = np.sum(np.power(np.subtract(numerical_data, y_total_avg), 2))
-    if denominator == 0:
-        eta = 0
-    else:
-        eta = np.sqrt(numerator / denominator)
-    return eta
+    return 0 if denominator == 0 else np.sqrt(numerator / denominator)
